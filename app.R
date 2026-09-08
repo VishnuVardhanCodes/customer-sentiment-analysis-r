@@ -3,34 +3,37 @@
 # Main Shiny Web Application (app.R) - Redesigned Professional Analytics UI
 # ==============================================================================
 
+# Auto-set working directory to project root if needed
+proj_dir <- "C:/DOCUMENTS/4 YEAR SUBJECTS/TERM 1/DA/PROJECT DA/customer-sentiment-analysis-r"
+if (dir.exists(proj_dir)) {
+  try(setwd(proj_dir), silent = TRUE)
+}
+
+# Auto-check and install missing packages dynamically at startup
+required_packages <- c(
+  "shiny", "bslib", "dplyr", "readr", "stringr", "tidytext",
+  "tm", "SnowballC", "ggplot2", "wordcloud", "wordcloud2",
+  "e1071", "class", "Matrix", "DT", "tidyr", "syuzhet"
+)
+
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
+if (length(missing_packages) > 0) {
+  message("Installing missing R packages for LG9 Project: ", paste(missing_packages, collapse = ", "))
+  install.packages(missing_packages, repos = "https://cloud.r-project.org/", dependencies = TRUE)
+}
+
 suppressPackageStartupMessages({
-  library(shiny)
-  library(bslib)
-  library(dplyr)
-  library(readr)
-  library(stringr)
-  library(tidytext)
-  library(tm)
-  library(SnowballC)
-  library(ggplot2)
-  library(wordcloud)
-  library(wordcloud2)
-  library(e1071)
-  library(class)
-  library(Matrix)
-  library(DT)
-  library(tidyr)
-  library(syuzhet)
+  lapply(required_packages, library, character.only = TRUE)
 })
 
-# Source modular backend scripts (Preserving exact backend functions)
-source("R/preprocessing.R", local = TRUE)
-source("R/text_mining.R", local = TRUE)
-source("R/sentiment_analysis.R", local = TRUE)
-source("R/machine_learning.R", local = TRUE)
-source("R/evaluation.R", local = TRUE)
-source("R/visualization.R", local = TRUE)
-source("R/insights.R", local = TRUE)
+# Source modular backend scripts using robust absolute paths
+source(file.path(proj_dir, "R/preprocessing.R"), local = TRUE)
+source(file.path(proj_dir, "R/text_mining.R"), local = TRUE)
+source(file.path(proj_dir, "R/sentiment_analysis.R"), local = TRUE)
+source(file.path(proj_dir, "R/machine_learning.R"), local = TRUE)
+source(file.path(proj_dir, "R/evaluation.R"), local = TRUE)
+source(file.path(proj_dir, "R/visualization.R"), local = TRUE)
+source(file.path(proj_dir, "R/insights.R"), local = TRUE)
 
 # Set seed for reproducibility across all random operations
 set.seed(123)
@@ -42,7 +45,7 @@ ui <- page_sidebar(
   
   # Inject Custom CSS Stylesheet
   header = tags$head(
-    includeCSS("www/styles.css")
+    includeCSS(file.path(proj_dir, "www/styles.css"))
   ),
   
   # ----------------------------------------------------------------------------
