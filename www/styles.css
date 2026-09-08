@@ -1,0 +1,168 @@
+/* ==============================================================================
+   LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
+   Custom Web Application Styling (www/styles.css)
+   ============================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* Header Banner */
+.main-header {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-bottom: 4px solid #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.main-header h1 {
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0;
+  color: #ffffff;
+}
+
+.main-header p {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Navbar / Sidebar Customization */
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+
+.nav-pills .nav-link {
+  color: #475569;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.nav-pills .nav-link:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+/* KPI Cards */
+.kpi-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.kpi-subtext {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.35rem;
+}
+
+/* Specific KPI Theme Colors */
+.kpi-total { border-top: 4px solid #3b82f6; }
+.kpi-pos   { border-top: 4px solid #10b981; }
+.kpi-neu   { border-top: 4px solid #6366f1; }
+.kpi-neg   { border-top: 4px solid #ef4444; }
+.kpi-ml    { border-top: 4px solid #8b5cf6; }
+
+/* Alert Boxes & Academic Cards */
+.academic-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.academic-card-header {
+  background: #f1f5f9;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.academic-card-body {
+  padding: 1.25rem;
+}
+
+/* Sentiment Badges */
+.badge-pos {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.825rem;
+}
+
+.badge-neu {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.825rem;
+}
+
+.badge-neg {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.825rem;
+}
+
+/* Recommendations List */
+.recommendation-item {
+  background-color: #f8fafc;
+  border-left: 4px solid #2563eb;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+/* Data Table Customization */
+.dataTables_wrapper {
+  font-size: 0.9rem;
+}

@@ -1,0 +1,28 @@
+# R environment files
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# Data directories (keep sample, ignore raw/processed)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Output files
+outputs/results/*
+!outputs/results/.gitkeep
+outputs/plots/*
+!outputs/plots/.gitkeep
+outputs/reports/*
+!outputs/reports/.gitkeep
+
+# Operating system files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
