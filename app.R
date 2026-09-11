@@ -1,6 +1,6 @@
 # ==============================================================================
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
-# Main Shiny Web Application (app.R) - Redesigned Professional Analytics UI
+# Main Shiny Web Application (app.R) - Professional Analytics Dashboard
 # ==============================================================================
 
 # Auto-set working directory to project root if needed
@@ -41,7 +41,7 @@ set.seed(123)
 # Define Shiny User Interface (UI)
 ui <- page_sidebar(
   title = NULL,
-  theme = bs_theme(version = 5, bootswatch = "flatly", primary = "#2563eb"),
+  theme = bs_theme(version = 5, bootswatch = "flatly", primary = "#1e3a8a"),
   
   # Inject Custom CSS Stylesheet
   header = tags$head(
@@ -49,31 +49,32 @@ ui <- page_sidebar(
   ),
   
   # ----------------------------------------------------------------------------
-  # TOP APPLICATION HEADER WITH DYNAMIC STATUS INDICATOR
+  # SIDEBAR NAVIGATION (11 Numbered Items with Icons)
   # ----------------------------------------------------------------------------
   sidebar = sidebar(
-    width = 280,
+    width = 270,
+    class = "sidebar",
     title = div(
-      style = "padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.75rem;",
-      span(class = "fw-bold text-primary", style = "font-size: 1.1rem;", "LG9 ANALYTICS")
+      class = "sidebar-title",
+      span(class = "sidebar-title-badge", "LG9"),
+      span(class = "sidebar-title-text", "ANALYTICS")
     ),
     
-    # 11 NUMBERED NAVIGATION ITEMS WITH ICONS
     navlistPanel(
       id = "main_nav",
       well = FALSE,
       widths = c(12, 12),
       
       tabPanel(
-        title = tagList(span(class = "nav-num", "01"), icon("dashboard"), "Dashboard"),
+        title = tagList(span(class = "nav-num", "01"), icon("tachometer-alt"), "Dashboard"),
         value = "tab_dashboard"
       ),
       tabPanel(
-        title = tagList(span(class = "nav-num", "02"), icon("upload"), "Upload Data"),
+        title = tagList(span(class = "nav-num", "02"), icon("cloud-upload-alt"), "Upload Data"),
         value = "tab_upload"
       ),
       tabPanel(
-        title = tagList(span(class = "nav-num", "03"), icon("check-square"), "Data Validation"),
+        title = tagList(span(class = "nav-num", "03"), icon("check-circle"), "Data Validation"),
         value = "tab_validation"
       ),
       tabPanel(
@@ -111,7 +112,7 @@ ui <- page_sidebar(
     )
   ),
   
-  # MAIN HEADER BANNER
+  # MAIN HEADER BANNER WITH DYNAMIC STATUS PILL
   div(
     class = "top-app-header",
     div(
@@ -120,7 +121,7 @@ ui <- page_sidebar(
       div(
         class = "top-header-titles",
         h1("Customer Sentiment Analysis"),
-        p("From Social Media using Text Mining in R")
+        p("Social Media • Text Mining • R")
       )
     ),
     div(
@@ -129,16 +130,23 @@ ui <- page_sidebar(
     )
   ),
   
-  # ----------------------------------------------------------------------------
-  # MAIN CONTENT AREA - TAB CONTENTS
-  # ----------------------------------------------------------------------------
-  uiOutput("ui_main_content")
+  # MAIN CONTENT AREA
+  div(
+    style = "min-height: calc(100vh - 160px);",
+    uiOutput("ui_main_content")
+  ),
+  
+  # GLOBAL FOOTER
+  div(
+    class = "app-footer",
+    span("LG9 Analytics"), " • Customer Sentiment Analysis from Social Media using Text Mining in R • Academic Data Analytics Project"
+  )
 )
 
 # Define Shiny Server Logic
 server <- function(input, output, session) {
   
-  # Reactive State Store (Preserving backend structure)
+  # Reactive State Store (Preserving 100% backend structure)
   rv <- reactiveValues(
     raw_data          = NULL,
     file_name         = NULL,
@@ -161,17 +169,17 @@ server <- function(input, output, session) {
   output$ui_app_status_pill <- renderUI({
     status_text <- rv$app_status
     dot_color <- case_when(
-      status_text == "Ready for Analysis"  ~ "#3b82f6", # Blue
-      status_text == "Dataset Loaded"      ~ "#f59e0b", # Amber
-      status_text == "Analysis in Progress"~ "#6366f1", # Indigo
-      status_text == "Analysis Complete"   ~ "#10b981", # Green
-      TRUE                                 ~ "#3b82f6"
+      status_text == "Ready for Analysis"   ~ "#3b82f6", # Blue
+      status_text == "Dataset Loaded"       ~ "#f59e0b", # Amber
+      status_text == "Analysis in Progress" ~ "#6366f1", # Indigo
+      status_text == "Analysis Complete"    ~ "#10b981", # Green
+      TRUE                                  ~ "#3b82f6"
     )
     
     div(
       class = "status-pill",
-      div(class = "status-dot", style = paste0("background-color: ", dot_color, ";")),
-      span(status_text)
+      div(class = "status-dot", style = paste0("background-color: ", dot_color, "; color: ", dot_color, ";")),
+      span(paste0("● ", status_text))
     )
   })
   
@@ -202,89 +210,107 @@ server <- function(input, output, session) {
   # ----------------------------------------------------------------------------
   ui_tab_dashboard <- function() {
     tagList(
-      # Hero / Intro Card
+      # Hero & Quick Action Card
       div(
-        class = "hero-card",
-        div(class = "hero-title", "Customer Sentiment Analysis Platform"),
-        div(class = "hero-subtitle", "Analyze customer feedback using text mining, TF-IDF weights, lexicon sentiment analysis, and machine learning in R."),
+        class = "hero-banner",
+        div(class = "hero-banner-title", "Customer Sentiment Analysis Platform"),
+        div(class = "hero-banner-subtitle", "Analyze customer feedback using text mining, TF-IDF weights, lexicon sentiment analysis, and machine learning in R."),
+        
         div(
-          style = "display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;",
-          actionButton("btn_goto_upload", "Upload Dataset", icon = icon("upload"), class = "btn-primary"),
-          actionButton("btn_load_sample_labeled", "Demo: Load Sample Labeled Data", icon = icon("flask"), class = "btn-success"),
-          actionButton("btn_load_sample_unlabeled", "Demo: Load Sample Unlabeled Data", icon = icon("info-circle"), class = "btn-outline-primary")
+          class = "quick-action-cards",
+          div(
+            class = "quick-action-card",
+            div(class = "quick-action-title", "01 • Dataset Upload"),
+            div(class = "quick-action-desc", "Load your custom CSV or TXT customer feedback dataset to begin analysis."),
+            actionButton("btn_goto_upload", "Upload Dataset", icon = icon("upload"), class = "btn-primary w-100")
+          ),
+          div(
+            class = "quick-action-card",
+            div(class = "quick-action-title", "02 • Demo Datasets"),
+            div(class = "quick-action-desc", "Test system workflow using pre-loaded sample datasets."),
+            div(
+              style = "display: flex; gap: 0.5rem;",
+              actionButton("btn_load_sample_labeled", "Run Labeled Demo", icon = icon("flask"), class = "btn-success w-50"),
+              actionButton("btn_load_sample_unlabeled", "Run Unlabeled Demo", icon = icon("info-circle"), class = "btn-outline-primary w-50")
+            )
+          )
         ),
         
-        # Academic Methodology Workflow Component
+        # Horizontal Visual Workflow Step Cards
         div(
-          class = "workflow-container",
-          div(class = "workflow-step", "DATA INPUT"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "PREPROCESSING"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "TEXT MINING"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "SENTIMENT ANALYSIS"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "MACHINE LEARNING"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "EVALUATION"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "VISUALIZATION"), span(class = "workflow-arrow", "→"),
-          div(class = "workflow-step", "CUSTOMER INSIGHTS")
+          class = "workflow-steps-wrapper",
+          div(class = "workflow-steps-title", "Academic Methodology Workflow"),
+          div(
+            class = "workflow-steps-grid",
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "01"), div(class = "workflow-step-name", "DATA INPUT"), div(class = "workflow-step-desc", "Upload CSV/TXT")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "02"), div(class = "workflow-step-name", "PREPROCESSING"), div(class = "workflow-step-desc", "Clean customer text")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "03"), div(class = "workflow-step-name", "TEXT MINING"), div(class = "workflow-step-desc", "TF-IDF & keywords")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "04"), div(class = "workflow-step-name", "SENTIMENT"), div(class = "workflow-step-desc", "Pos / Neu / Neg")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "05"), div(class = "workflow-step-name", "MACHINE LEARNING"), div(class = "workflow-step-desc", "NB, SVM, KNN")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "06"), div(class = "workflow-step-name", "EVALUATION"), div(class = "workflow-step-desc", "Accuracy & F1")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "07"), div(class = "workflow-step-name", "VISUALIZATION"), div(class = "workflow-step-desc", "Charts & clouds")),
+            div(class = "workflow-step-card", div(class = "workflow-step-num", "08"), div(class = "workflow-step-name", "INSIGHTS"), div(class = "workflow-step-desc", "Recommendations"))
+          )
         )
       ),
       
-      # Analysis Status Tracker Card
+      # Pipeline Status Tracker Card
       div(
-        class = "academic-card",
-        div(class = "academic-card-header", "Application Pipeline Status Tracker"),
+        class = "analytics-card",
+        div(class = "analytics-card-header", "Application Pipeline Status Tracker"),
         div(
-          class = "academic-card-body",
+          class = "analytics-card-body",
           div(
-            class = "status-tracker-grid",
+            class = "pipeline-steps-grid",
             div(
-              class = "status-tracker-item",
-              div(class = "status-tracker-label", "Dataset Status"),
-              div(class = "status-tracker-val", if(!is.null(rv$raw_data)) span(class = "status-badge-valid", "Loaded") else span(class = "text-muted", "Not Loaded"))
+              class = "pipeline-step-card",
+              div(class = "pipeline-step-num", "Dataset"),
+              div(class = "pipeline-step-name", if(!is.null(rv$raw_data)) span(class = "badge-pass", "Loaded") else span(class = "text-muted", "Not Loaded"))
             ),
             div(
-              class = "status-tracker-item",
-              div(class = "status-tracker-label", "Preprocessing"),
-              div(class = "status-tracker-val", if(!is.null(rv$processed_data)) span(class = "status-badge-valid", "Completed") else span(class = "text-muted", "Not Run"))
+              class = "pipeline-step-card",
+              div(class = "pipeline-step-num", "Preprocessing"),
+              div(class = "pipeline-step-name", if(!is.null(rv$processed_data)) span(class = "badge-pass", "Completed") else span(class = "text-muted", "Not Run"))
             ),
             div(
-              class = "status-tracker-item",
-              div(class = "status-tracker-label", "Text Mining"),
-              div(class = "status-tracker-val", if(!is.null(rv$freq_data)) span(class = "status-badge-valid", "Completed") else span(class = "text-muted", "Not Run"))
+              class = "pipeline-step-card",
+              div(class = "pipeline-step-num", "Text Mining"),
+              div(class = "pipeline-step-name", if(!is.null(rv$freq_data)) span(class = "badge-pass", "Completed") else span(class = "text-muted", "Not Run"))
             ),
             div(
-              class = "status-tracker-item",
-              div(class = "status-tracker-label", "Sentiment Analysis"),
-              div(class = "status-tracker-val", if(!is.null(rv$sentiment_data)) span(class = "status-badge-valid", "Completed") else span(class = "text-muted", "Not Run"))
+              class = "pipeline-step-card",
+              div(class = "pipeline-step-num", "Sentiment"),
+              div(class = "pipeline-step-name", if(!is.null(rv$sentiment_data)) span(class = "badge-pass", "Completed") else span(class = "text-muted", "Not Run"))
             ),
             div(
-              class = "status-tracker-item",
-              div(class = "status-tracker-label", "Machine Learning"),
-              div(class = "status-tracker-val", 
-                  if(is.null(rv$label_col)) span(class = "status-badge-warning", "Unavailable (Unlabeled)") 
-                  else if(!is.null(rv$ml_eval)) span(class = "status-badge-valid", "Completed")
+              class = "pipeline-step-card",
+              div(class = "pipeline-step-num", "ML Models"),
+              div(class = "pipeline-step-name", 
+                  if(is.null(rv$label_col) && !is.null(rv$raw_data)) span(class = "badge-warn", "Unlabeled") 
+                  else if(!is.null(rv$ml_eval)) span(class = "badge-pass", "Evaluated")
                   else span(class = "text-muted", "Ready to Run"))
             ),
             div(
-              class = "status-tracker-item",
-              div(class = "status-tracker-label", "Customer Insights"),
-              div(class = "status-tracker-val", if(!is.null(rv$insights_data)) span(class = "status-badge-valid", "Generated") else span(class = "text-muted", "Not Run"))
+              class = "pipeline-step-card",
+              div(class = "pipeline-step-num", "Insights"),
+              div(class = "pipeline-step-name", if(!is.null(rv$insights_data)) span(class = "badge-pass", "Generated") else span(class = "text-muted", "Not Run"))
             )
           )
         )
       ),
       
-      # KPI Cards Section
+      # Dynamic KPI Cards
       uiOutput("ui_dashboard_kpis"),
       
-      # Main Analytics Grid (Sentiment Overview, Top Terms, Model Performance, Quick Insights)
+      # 2x2 Analytics Grid
       fluidRow(
         column(
           width = 6,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Sentiment Overview"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Sentiment Overview"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               if(!is.null(rv$sentiment_data)) {
                 plotOutput("plot_dash_sentiment", height = "300px")
               } else {
@@ -292,7 +318,7 @@ server <- function(input, output, session) {
                   class = "empty-state",
                   div(class = "empty-state-icon", icon("chart-bar")),
                   div(class = "empty-state-title", "No Sentiment Data Available"),
-                  div(class = "empty-state-text", "Upload a dataset and run sentiment analysis to view the distribution.")
+                  div(class = "empty-state-text", "Upload a dataset and run sentiment analysis to view distribution.")
                 )
               }
             )
@@ -301,10 +327,10 @@ server <- function(input, output, session) {
         column(
           width = 6,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Most Discussed Terms (Top Words)"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Most Discussed Terms (Top Words)"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               if(!is.null(rv$freq_data)) {
                 plotOutput("plot_dash_freq", height = "300px")
               } else {
@@ -324,13 +350,13 @@ server <- function(input, output, session) {
         column(
           width = 6,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Machine Learning Performance"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Machine Learning Model Performance"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               if (!is.null(rv$ml_eval)) {
                 tableOutput("tbl_dash_ml_summary")
-              } else if (is.null(rv$label_col)) {
+              } else if (is.null(rv$label_col) && !is.null(rv$raw_data)) {
                 div(
                   class = "alert alert-warning mb-0",
                   icon("info-circle"),
@@ -341,7 +367,7 @@ server <- function(input, output, session) {
                   class = "empty-state",
                   div(class = "empty-state-icon", icon("brain")),
                   div(class = "empty-state-title", "Supervised ML Ready"),
-                  div(class = "empty-state-text", "Navigate to Machine Learning to evaluate Naive Bayes, SVM, and KNN models.")
+                  div(class = "empty-state-text", "Upload labeled data to evaluate Naive Bayes, SVM, and KNN algorithms.")
                 )
               }
             )
@@ -350,10 +376,14 @@ server <- function(input, output, session) {
         column(
           width = 6,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Quick Customer Insights Summary"),
+            class = "analytics-card",
             div(
-              class = "academic-card-body",
+              class = "analytics-card-header",
+              "Quick Customer Insights Preview",
+              if(!is.null(rv$insights_data)) actionButton("btn_goto_insights", "View All Insights", class = "btn-outline-primary btn-sm") else NULL
+            ),
+            div(
+              class = "analytics-card-body",
               if(!is.null(rv$insights_data)) {
                 uiOutput("ui_dash_quick_insights")
               } else {
@@ -375,35 +405,43 @@ server <- function(input, output, session) {
   # TAB 2: UPLOAD DATA BUILDER
   # ----------------------------------------------------------------------------
   ui_tab_upload <- function() {
-    fluidRow(
-      column(
-        width = 5,
-        div(
-          class = "academic-card",
-          div(class = "academic-card-header", "Upload Customer Feedback Dataset"),
-          div(
-            class = "academic-card-body",
-            fileInput("file_input", "Select CSV or TXT Dataset", accept = c(".csv", ".txt"), width = "100%"),
-            helpText("Supported formats: CSV (comma-separated) or TXT (tab-delimited)."),
-            hr(),
-            uiOutput("ui_text_column_selector"),
-            uiOutput("ui_label_column_selector"),
-            br(),
-            actionButton("btn_confirm_upload", "Confirm Dataset Configuration", icon = icon("check-circle"), class = "btn-primary w-100")
-          )
-        )
+    tagList(
+      div(
+        class = "section-header",
+        h2("Upload Customer Feedback Dataset"),
+        p("Upload a CSV or TXT file containing customer reviews, comments, or social-media feedback.")
       ),
-      column(
-        width = 7,
-        div(
-          class = "academic-card",
-          div(class = "academic-card-header", "Dataset Summary & Readyness Checklist"),
+      
+      fluidRow(
+        column(
+          width = 5,
           div(
-            class = "academic-card-body",
-            uiOutput("ui_upload_summary_cards"),
-            hr(),
-            h6("Dataset Preview (First 10 Records):", class = "fw-bold text-navy"),
-            DTOutput("tbl_raw_preview")
+            class = "analytics-card",
+            div(class = "analytics-card-header", "File Selector & Configuration"),
+            div(
+              class = "analytics-card-body",
+              fileInput("file_input", "Select CSV or TXT Dataset", accept = c(".csv", ".txt"), width = "100%"),
+              helpText("Supported file formats: CSV (comma-separated) or TXT (tab-delimited)."),
+              hr(),
+              uiOutput("ui_text_column_selector"),
+              uiOutput("ui_label_column_selector"),
+              br(),
+              actionButton("btn_confirm_upload", "Confirm Dataset Configuration", icon = icon("check-circle"), class = "btn-primary w-100")
+            )
+          )
+        ),
+        column(
+          width = 7,
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Dataset Summary Checklist"),
+            div(
+              class = "analytics-card-body",
+              uiOutput("ui_upload_summary_cards"),
+              hr(),
+              h6("Dataset Preview (First 10 Records):", class = "fw-bold text-dark mb-3"),
+              DTOutput("tbl_raw_preview")
+            )
           )
         )
       )
@@ -416,20 +454,28 @@ server <- function(input, output, session) {
   ui_tab_validation <- function() {
     tagList(
       div(
-        class = "academic-card",
-        div(class = "academic-card-header", "Dataset Quality & Integrity Diagnostics"),
+        class = "section-header",
+        h2("Data Validation & Quality Diagnostics"),
+        p("Verify dataset integrity, missing records, column types, and sentiment label availability.")
+      ),
+      
+      uiOutput("ui_validation_status_boxes"),
+      br(),
+      
+      div(
+        class = "analytics-card",
+        div(class = "analytics-card-header", "Data Quality Checklist"),
         div(
-          class = "academic-card-body",
-          uiOutput("ui_validation_status_boxes"),
-          hr(),
+          class = "analytics-card-body",
           uiOutput("ui_validation_notice")
         )
       ),
+      
       div(
-        class = "academic-card",
-        div(class = "academic-card-header", "Dataset Structure & Column Metadata"),
+        class = "analytics-card",
+        div(class = "analytics-card-header", "Dataset Structure & Column Metadata"),
         div(
-          class = "academic-card-body",
+          class = "analytics-card-body",
           tableOutput("tbl_validation_structure")
         )
       )
@@ -441,12 +487,17 @@ server <- function(input, output, session) {
   # ----------------------------------------------------------------------------
   ui_tab_preprocessing <- function() {
     tagList(
-      # Preprocessing Pipeline Steps Cards
       div(
-        class = "academic-card",
-        div(class = "academic-card-header", "Text Preprocessing Pipeline Steps"),
+        class = "section-header",
+        h2("Text Preprocessing Pipeline"),
+        p("Clean customer text feedback by removing noise, URLs, stopwords, and applying Porter stemming.")
+      ),
+      
+      div(
+        class = "analytics-card",
+        div(class = "analytics-card-header", "Processing Pipeline Steps"),
         div(
-          class = "academic-card-body",
+          class = "analytics-card-body",
           div(
             class = "pipeline-steps-grid",
             div(class = "pipeline-step-card", div(class = "pipeline-step-num", "Step 1"), div(class = "pipeline-step-name", "Lowercase")),
@@ -461,23 +512,29 @@ server <- function(input, output, session) {
         )
       ),
       
-      sidebarLayout(
-        sidebarPanel(
+      fluidRow(
+        column(
           width = 4,
-          h5("Preprocessing Controls", class = "fw-bold"),
-          checkboxInput("chk_stopwords", "Remove English Stop Words", value = TRUE),
-          checkboxInput("chk_stemming", "Apply Porter Stemming", value = TRUE),
-          br(),
-          uiOutput("ui_preprocess_button"),
-          helpText("Filters noise, tokenizes documents, and builds clean feature vectors.")
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Preprocessing Controls"),
+            div(
+              class = "analytics-card-body",
+              checkboxInput("chk_stopwords", "Remove English Stop Words", value = TRUE),
+              checkboxInput("chk_stemming", "Apply Porter Stemming", value = TRUE),
+              br(),
+              uiOutput("ui_preprocess_button"),
+              helpText("Filters noise, tokenizes documents, and builds clean feature vectors.")
+            )
+          )
         ),
-        mainPanel(
+        column(
           width = 8,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "BEFORE vs AFTER Text Cleaning Comparison"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "BEFORE vs AFTER Text Cleaning Comparison"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               if(!is.null(rv$processed_data)) {
                 DTOutput("tbl_preprocess_compare")
               } else {
@@ -499,31 +556,39 @@ server <- function(input, output, session) {
   # TAB 5: TEXT MINING BUILDER
   # ----------------------------------------------------------------------------
   ui_tab_text_mining <- function() {
-    navset_card_tab(
-      nav_panel(
-        title = "Word Frequency",
-        fluidRow(
-          column(width = 4, selectInput("sel_top_n_freq", "Select Top N Words:", choices = c(10, 20, 30, 50), selected = 20))
+    tagList(
+      div(
+        class = "section-header",
+        h2("Text Mining & Feature Extraction"),
+        p("Explore word frequencies, TF-IDF term weights, keyword extractions, and word clouds.")
+      ),
+      
+      navset_card_tab(
+        nav_panel(
+          title = "Word Frequency",
+          fluidRow(
+            column(width = 4, selectInput("sel_top_n_freq", "Select Top N Words:", choices = c(10, 20, 30, 50), selected = 20))
+          ),
+          fluidRow(
+            column(width = 6, plotOutput("plot_word_freq", height = "400px")),
+            column(width = 6, DTOutput("tbl_word_freq"))
+          )
         ),
-        fluidRow(
-          column(width = 6, plotOutput("plot_word_freq", height = "400px")),
-          column(width = 6, DTOutput("tbl_word_freq"))
+        nav_panel(
+          title = "TF-IDF Analysis",
+          fluidRow(
+            column(width = 6, plotOutput("plot_tfidf", height = "400px")),
+            column(width = 6, DTOutput("tbl_tfidf"))
+          )
+        ),
+        nav_panel(
+          title = "Word Cloud",
+          div(style = "text-align: center; padding: 1rem;", plotOutput("plot_wordcloud", height = "500px"))
+        ),
+        nav_panel(
+          title = "Keywords",
+          DTOutput("tbl_keywords")
         )
-      ),
-      nav_panel(
-        title = "TF-IDF Analysis",
-        fluidRow(
-          column(width = 6, plotOutput("plot_tfidf", height = "400px")),
-          column(width = 6, DTOutput("tbl_tfidf"))
-        )
-      ),
-      nav_panel(
-        title = "Word Cloud",
-        div(style = "text-align: center; padding: 1rem;", plotOutput("plot_wordcloud", height = "500px"))
-      ),
-      nav_panel(
-        title = "Keywords",
-        DTOutput("tbl_keywords")
       )
     )
   }
@@ -533,6 +598,12 @@ server <- function(input, output, session) {
   # ----------------------------------------------------------------------------
   ui_tab_sentiment <- function() {
     tagList(
+      div(
+        class = "section-header",
+        h2("Lexicon-Based Sentiment Analysis"),
+        p("Classify reviews into Positive, Neutral, and Negative categories using Syuzhet lexicon scores.")
+      ),
+      
       fluidRow(
         column(width = 12, uiOutput("ui_sentiment_button"))
       ),
@@ -542,10 +613,10 @@ server <- function(input, output, session) {
         column(
           width = 6,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Sentiment Class Distribution"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Sentiment Class Distribution"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               if(!is.null(rv$sentiment_data)) plotOutput("plot_sentiment_dist", height = "380px")
               else div(class = "empty-state", div(class = "empty-state-title", "Run Sentiment Analysis to view distribution."))
             )
@@ -554,10 +625,10 @@ server <- function(input, output, session) {
         column(
           width = 6,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Per-Review Sentiment Scores"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Per-Review Sentiment Scores"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               if(!is.null(rv$sentiment_data)) DTOutput("tbl_sentiment_results")
               else div(class = "empty-state", div(class = "empty-state-title", "No Sentiment Data"))
             )
@@ -572,16 +643,24 @@ server <- function(input, output, session) {
   # ----------------------------------------------------------------------------
   ui_tab_ml <- function() {
     tagList(
+      div(
+        class = "section-header",
+        h2("Sentiment Classification Models"),
+        p("Train and compare supervised machine-learning algorithms (Naive Bayes, SVM, KNN) using TF-IDF features.")
+      ),
+      
       uiOutput("ui_ml_status_banner"),
+      
       fluidRow(
         column(
           width = 4,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Supervised Training Setup"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Supervised Training Setup"),
             div(
-              class = "academic-card-body",
-              p("Train Naive Bayes, SVM, and KNN algorithms using sparse TF-IDF feature matrices."),
+              class = "analytics-card-body",
+              p("Algorithms: ", tags$strong("Naive Bayes, SVM, KNN")),
+              p("Feature Matrix: ", tags$strong("TF-IDF Vector Space")),
               p("Data Split: ", tags$strong("80% Training / 20% Testing")),
               p("Reproducibility Seed: ", tags$strong("set.seed(123)")),
               br(),
@@ -592,10 +671,10 @@ server <- function(input, output, session) {
         column(
           width = 8,
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Machine Learning Pipeline Log"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Machine Learning Pipeline Log"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               verbatimTextOutput("txt_ml_log")
             )
           )
@@ -608,13 +687,19 @@ server <- function(input, output, session) {
   # TAB 8: MODEL EVALUATION BUILDER
   # ----------------------------------------------------------------------------
   ui_tab_evaluation <- function() {
-    if (is.null(rv$ml_eval)) {
-      return(
+    tagList(
+      div(
+        class = "section-header",
+        h2("Supervised Model Performance & Evaluation"),
+        p("Compare Accuracy, Precision, Recall, F1-Score, and Confusion Matrices across Naive Bayes, SVM, and KNN.")
+      ),
+      
+      if (is.null(rv$ml_eval)) {
         div(
-          class = "academic-card",
-          div(class = "academic-card-header", "Model Evaluation"),
+          class = "analytics-card",
+          div(class = "analytics-card-header", "Model Evaluation"),
           div(
-            class = "academic-card-body",
+            class = "analytics-card-body",
             if (is.null(rv$label_col)) {
               div(class = "alert alert-warning mb-0", icon("info-circle"), " No labeled sentiment column was found. Lexicon-based sentiment analysis is available, but supervised model evaluation requires genuine labeled training data.")
             } else {
@@ -622,42 +707,40 @@ server <- function(input, output, session) {
             }
           )
         )
-      )
-    }
-    
-    comp_df <- rv$ml_eval$Comparison_Table
-    best_m  <- rv$ml_eval$Best_Model
-    
-    tagList(
-      fluidRow(
-        column(
-          width = 12,
+      } else {
+        comp_df <- rv$ml_eval$Comparison_Table
+        best_m  <- rv$ml_eval$Best_Model
+        
+        tagList(
           div(
-            class = "alert alert-info",
+            class = "alert alert-info mb-4",
             tags$strong("Best Performing Model: "),
             sprintf("%s achieved the highest score with Accuracy of %.2f%% and F1-Score of %.2f%%.",
                     best_m, rv$ml_eval$Best_Accuracy * 100, rv$ml_eval$Best_F1 * 100)
-          )
-        )
-      ),
-      fluidRow(
-        column(
-          width = 12,
+          ),
+          
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Model Performance Metrics Table"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Model Performance Metrics Table"),
             div(
-              class = "academic-card-body",
+              class = "analytics-card-body",
               tableOutput("tbl_model_comparison")
             )
+          ),
+          
+          div(
+            class = "section-header mt-4",
+            h3("Confusion Matrices"),
+            p("Classification breakdown across actual vs predicted sentiment classes.")
+          ),
+          
+          fluidRow(
+            column(width = 4, plotOutput("plot_cm_nb", height = "320px")),
+            column(width = 4, plotOutput("plot_cm_svm", height = "320px")),
+            column(width = 4, plotOutput("plot_cm_knn", height = "320px"))
           )
         )
-      ),
-      fluidRow(
-        column(width = 4, plotOutput("plot_cm_nb", height = "320px")),
-        column(width = 4, plotOutput("plot_cm_svm", height = "320px")),
-        column(width = 4, plotOutput("plot_cm_knn", height = "320px"))
-      )
+      }
     )
   }
 
@@ -665,11 +748,49 @@ server <- function(input, output, session) {
   # TAB 9: VISUALIZATION HUB BUILDER
   # ----------------------------------------------------------------------------
   ui_tab_visualization <- function() {
-    navset_card_tab(
-      nav_panel("Sentiment Distribution", plotOutput("plot_viz_sentiment", height = "450px")),
-      nav_panel("Top Frequent Words", plotOutput("plot_viz_freq", height = "450px")),
-      nav_panel("Top TF-IDF Terms", plotOutput("plot_viz_tfidf", height = "450px")),
-      nav_panel("ML Models Comparison", plotOutput("plot_viz_ml_comp", height = "450px"))
+    tagList(
+      div(
+        class = "section-header",
+        h2("Visualization Dashboard"),
+        p("Comprehensive visual analytics summarizing sentiment distributions, term frequencies, and ML metrics.")
+      ),
+      
+      fluidRow(
+        column(
+          width = 6,
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Sentiment Class Distribution"),
+            div(class = "analytics-card-body", plotOutput("plot_viz_sentiment", height = "360px"))
+          )
+        ),
+        column(
+          width = 6,
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Top Frequent Terms"),
+            div(class = "analytics-card-body", plotOutput("plot_viz_freq", height = "360px"))
+          )
+        )
+      ),
+      fluidRow(
+        column(
+          width = 6,
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Top TF-IDF Term Weights"),
+            div(class = "analytics-card-body", plotOutput("plot_viz_tfidf", height = "360px"))
+          )
+        ),
+        column(
+          width = 6,
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Supervised ML Model Comparison"),
+            div(class = "analytics-card-body", plotOutput("plot_viz_ml_comp", height = "360px"))
+          )
+        )
+      )
     )
   }
 
@@ -677,70 +798,86 @@ server <- function(input, output, session) {
   # TAB 10: CUSTOMER INSIGHTS BUILDER
   # ----------------------------------------------------------------------------
   ui_tab_insights <- function() {
-    if (is.null(rv$insights_data)) {
-      return(
+    tagList(
+      div(
+        class = "section-header",
+        h2("Customer Insights & Recommendations"),
+        p("Turn customer feedback into actionable business intelligence.")
+      ),
+      
+      if (is.null(rv$insights_data)) {
         div(
-          class = "academic-card",
-          div(class = "academic-card-header", "Customer Insights"),
+          class = "analytics-card",
+          div(class = "analytics-card-header", "Customer Insights"),
           div(
-            class = "academic-card-body",
+            class = "analytics-card-body",
             div(class = "empty-state", div(class = "empty-state-title", "No Insights Available"), div(class = "empty-state-text", "Please run Text Preprocessing and Sentiment Analysis to generate dynamic executive insights."))
           )
         )
-      )
-    }
-    
-    ins <- rv$insights_data
-    
-    tagList(
-      div(
-        class = "academic-card",
-        div(class = "academic-card-header", "Executive Sentiment Summary"),
-        div(class = "academic-card-body", p(ins$Executive_Summary, class = "lead"))
-      ),
-      if (!is.null(ins$ML_Insight)) {
-        div(
-          class = "academic-card",
-          div(class = "academic-card-header", "Machine Learning Performance Insight"),
-          div(class = "academic-card-body", p(ins$ML_Insight))
-        )
-      },
-      fluidRow(
-        column(
-          width = 6,
+      } else {
+        ins <- rv$insights_data
+        
+        tagList(
           div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Customers Like (Positive Themes)"),
+            class = "analytics-card",
+            div(class = "analytics-card-header", icon("chart-line"), " Executive Sentiment Summary"),
+            div(class = "analytics-card-body", p(ins$Executive_Summary, class = "lead fw-bold text-dark"))
+          ),
+          if (!is.null(ins$ML_Insight)) {
             div(
-              class = "academic-card-body",
-              tags$ul(lapply(ins$Positive_Themes, function(x) tags$li(tags$span(class = "badge-pos", x))))
+              class = "analytics-card",
+              div(class = "analytics-card-header", icon("brain"), " Machine Learning Performance Insight"),
+              div(class = "analytics-card-body", p(ins$ML_Insight))
+            )
+          },
+          fluidRow(
+            column(
+              width = 6,
+              div(
+                class = "analytics-card",
+                div(class = "analytics-card-header", icon("thumbs-up"), " What Customers Like (Positive Themes)"),
+                div(
+                  class = "analytics-card-body",
+                  div(
+                    class = "d-flex flex-wrap gap-2",
+                    lapply(ins$Positive_Themes, function(x) span(class = "badge-pos", x))
+                  )
+                )
+              )
+            ),
+            column(
+              width = 6,
+              div(
+                class = "analytics-card",
+                div(class = "analytics-card-header", icon("thumbs-down"), " What Customers Dislike / Common Issues"),
+                div(
+                  class = "analytics-card-body",
+                  div(
+                    class = "d-flex flex-wrap gap-2",
+                    lapply(ins$Negative_Themes, function(x) span(class = "badge-neg", x))
+                  )
+                )
+              )
+            )
+          ),
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", icon("lightbulb"), " Actionable Data-Driven Recommendations"),
+            div(
+              class = "analytics-card-body",
+              lapply(ins$Recommendations, function(rec) {
+                div(
+                  class = "recommendation-card",
+                  span(class = "recommendation-card-icon", icon("check-circle")),
+                  rec
+                )
+              }),
+              hr(),
+              p(class = "text-muted small italic mb-0", "Note: Insights and recommendations are dynamically derived from pattern frequencies in the uploaded dataset.")
             )
           )
-        ),
-        column(
-          width = 6,
-          div(
-            class = "academic-card",
-            div(class = "academic-card-header", "Customers Dislike / Common Issues"),
-            div(
-              class = "academic-card-body",
-              tags$ul(lapply(ins$Negative_Themes, function(x) tags$li(tags$span(class = "badge-neg", x))))
-            )
-          )
         )
-      ),
-      div(
-        class = "academic-card",
-        div(class = "academic-card-header", "Data-Driven Actionable Recommendations"),
-        div(
-          class = "academic-card-body",
-          lapply(ins$Recommendations, function(rec) {
-            div(class = "recommendation-item", rec)
-          }),
-          hr(),
-          p(class = "text-muted small italic", "Disclaimer: Insights and recommendations are automatically derived from pattern frequencies in the uploaded dataset.")
-        )
-      )
+      }
     )
   }
 
@@ -748,25 +885,38 @@ server <- function(input, output, session) {
   # TAB 11: RESULTS & DOWNLOAD BUILDER
   # ----------------------------------------------------------------------------
   ui_tab_export <- function() {
-    sidebarLayout(
-      sidebarPanel(
-        width = 4,
-        h5("Export Options", class = "fw-bold"),
-        p("Download processed datasets and evaluation reports."),
-        downloadButton("download_processed", "Download Processed Data (CSV)", class = "btn-outline-primary w-100 mb-2"),
-        downloadButton("download_sentiment", "Download Sentiment Results (CSV)", class = "btn-outline-success w-100 mb-2"),
-        downloadButton("download_ml_metrics", "Download ML Model Metrics (CSV)", class = "btn-outline-purple w-100 mb-2"),
-        downloadButton("download_report", "Download Insights Summary (TXT)", class = "btn-outline-dark w-100")
+    tagList(
+      div(
+        class = "section-header",
+        h2("Results & Export Center"),
+        p("Download processed datasets, sentiment classifications, ML metrics, and executive summary reports.")
       ),
-      mainPanel(
-        width = 8,
-        div(
-          class = "academic-card",
-          div(class = "academic-card-header", "Complete Analysis Results Table"),
+      
+      fluidRow(
+        column(
+          width = 4,
           div(
-            class = "academic-card-body",
-            if(!is.null(rv$sentiment_data)) DTOutput("tbl_full_results")
-            else div(class = "empty-state", div(class = "empty-state-title", "No Results Ready for Export"), div(class = "empty-state-text", "Run sentiment analysis to view and export complete data."))
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Export Options"),
+            div(
+              class = "analytics-card-body",
+              downloadButton("download_processed", "Download Processed Data (CSV)", class = "btn-outline-primary w-100 mb-3"),
+              downloadButton("download_sentiment", "Download Sentiment Results (CSV)", class = "btn-success w-100 mb-3"),
+              downloadButton("download_ml_metrics", "Download ML Model Metrics (CSV)", class = "btn-outline-primary w-100 mb-3"),
+              downloadButton("download_report", "Download Insights Summary (TXT)", class = "btn-primary w-100")
+            )
+          )
+        ),
+        column(
+          width = 8,
+          div(
+            class = "analytics-card",
+            div(class = "analytics-card-header", "Complete Analysis Results Table"),
+            div(
+              class = "analytics-card-body",
+              if(!is.null(rv$sentiment_data)) DTOutput("tbl_full_results")
+              else div(class = "empty-state", div(class = "empty-state-title", "No Results Ready for Export"), div(class = "empty-state-text", "Run sentiment analysis to view and export complete dataset results."))
+            )
           )
         )
       )
@@ -780,6 +930,10 @@ server <- function(input, output, session) {
   # Navigation Shortcuts
   observeEvent(input$btn_goto_upload, {
     updateNavlistPanel(session, "main_nav", selected = "tab_upload")
+  })
+  
+  observeEvent(input$btn_goto_insights, {
+    updateNavlistPanel(session, "main_nav", selected = "tab_insights")
   })
   
   # Load Sample Labeled Data Demo Button
@@ -877,16 +1031,16 @@ server <- function(input, output, session) {
     
     tagList(
       div(
-        class = "status-tracker-grid",
-        div(class = "status-tracker-item", div(class = "status-tracker-label", "File Name"), div(class = "status-tracker-val", rv$file_name)),
-        div(class = "status-tracker-item", div(class = "status-tracker-label", "Total Rows"), div(class = "status-tracker-val", nrow(rv$raw_data))),
-        div(class = "status-tracker-item", div(class = "status-tracker-label", "Total Columns"), div(class = "status-tracker-val", ncol(rv$raw_data))),
-        div(class = "status-tracker-item", div(class = "status-tracker-label", "Text Column"), div(class = "status-tracker-val text-primary", rv$text_col)),
-        div(class = "status-tracker-item", div(class = "status-tracker-label", "Label Column"), div(class = "status-tracker-val", if(!is.null(rv$label_col)) span(class = "status-badge-valid", rv$label_col) else span(class = "status-badge-warning", "Unlabeled")))
+        class = "pipeline-steps-grid",
+        div(class = "pipeline-step-card", div(class = "pipeline-step-num", "File Name"), div(class = "pipeline-step-name", rv$file_name)),
+        div(class = "pipeline-step-card", div(class = "pipeline-step-num", "Total Rows"), div(class = "pipeline-step-name", nrow(rv$raw_data))),
+        div(class = "pipeline-step-card", div(class = "pipeline-step-num", "Total Columns"), div(class = "pipeline-step-name", ncol(rv$raw_data))),
+        div(class = "pipeline-step-card", div(class = "pipeline-step-num", "Text Column"), div(class = "pipeline-step-name text-primary", rv$text_col)),
+        div(class = "pipeline-step-card", div(class = "pipeline-step-num", "Label Column"), div(class = "pipeline-step-name", if(!is.null(rv$label_col)) span(class = "badge-pass", rv$label_col) else span(class = "badge-warn", "Unlabeled")))
       ),
       br(),
       div(
-        class = "alert alert-success py-2",
+        class = "alert alert-success py-2 mb-0",
         icon("check-circle"), " ✓ Dataset uploaded ",
         icon("check-circle"), " ✓ Text column detected ",
         icon("check-circle"), " ✓ Ready for preprocessing"
@@ -914,11 +1068,12 @@ server <- function(input, output, session) {
     empty_records <- sum(nchar(str_trim(as.character(df[[text_c]]))) == 0, na.rm = TRUE)
     dup_rows      <- sum(duplicated(df[[text_c]]))
     
-    fluidRow(
-      column(width = 3, div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Records"), div(class = "kpi-value", total_records))),
-      column(width = 3, div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Columns Count"), div(class = "kpi-value", total_cols))),
-      column(width = 3, div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Missing Values"), div(class = "kpi-value", missing_vals))),
-      column(width = 3, div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Duplicate Text"), div(class = "kpi-value", dup_rows)))
+    div(
+      class = "kpi-grid",
+      div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Records"), div(class = "kpi-value", total_records)),
+      div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Columns Count"), div(class = "kpi-value", total_cols)),
+      div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Missing Values"), div(class = "kpi-value", missing_vals)),
+      div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Duplicate Text"), div(class = "kpi-value", dup_rows))
     )
   })
   
@@ -1069,11 +1224,12 @@ server <- function(input, output, session) {
     req(rv$sentiment_data)
     kpis <- calculate_sentiment_kpis(rv$sentiment_data)
     
-    fluidRow(
-      column(width = 3, div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Analyzed"), div(class = "kpi-value", kpis$Total))),
-      column(width = 3, div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Positive"), div(class = "kpi-value", paste0(kpis$Pos_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Pos_Count, "reviews")))),
-      column(width = 3, div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Neutral"), div(class = "kpi-value", paste0(kpis$Neu_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neu_Count, "reviews")))),
-      column(width = 3, div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Negative"), div(class = "kpi-value", paste0(kpis$Neg_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neg_Count, "reviews"))))
+    div(
+      class = "kpi-grid",
+      div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Analyzed"), div(class = "kpi-value", kpis$Total)),
+      div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Positive"), div(class = "kpi-value", paste0(kpis$Pos_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Pos_Count, "reviews"))),
+      div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Neutral"), div(class = "kpi-value", paste0(kpis$Neu_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neu_Count, "reviews"))),
+      div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Negative"), div(class = "kpi-value", paste0(kpis$Neg_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neg_Count, "reviews")))
     )
   })
 
@@ -1090,20 +1246,22 @@ server <- function(input, output, session) {
 
   # Machine Learning Exec
   output$ui_ml_status_banner <- renderUI({
-    if (is.null(rv$label_col)) {
+    if (is.null(rv$label_col) && !is.null(rv$raw_data)) {
       div(
         class = "alert alert-warning mb-3",
         icon("info-circle"),
         tags$strong(" Supervised Machine Learning Unavailable: "),
         "Your dataset does not contain a genuine sentiment-label column. Lexicon-based sentiment analysis is available, but supervised model evaluation requires labeled data."
       )
-    } else {
+    } else if (!is.null(rv$label_col)) {
       div(
         class = "alert alert-success mb-3",
         icon("check-circle"),
         tags$strong(" Ready for Supervised Learning: "),
         sprintf("Using ground-truth column '%s' for supervised classification.", rv$label_col)
       )
+    } else {
+      NULL
     }
   })
   
@@ -1183,16 +1341,25 @@ server <- function(input, output, session) {
 
   # Dashboard Specific Renderers
   output$ui_dashboard_kpis <- renderUI({
-    if (is.null(rv$sentiment_data)) return(NULL)
-    
-    kpis <- calculate_sentiment_kpis(rv$sentiment_data)
-    
-    fluidRow(
-      column(width = 3, div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Reviews"), div(class = "kpi-value", kpis$Total))),
-      column(width = 3, div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Positive Reviews"), div(class = "kpi-value", paste0(kpis$Pos_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Pos_Count, "reviews")))),
-      column(width = 3, div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Neutral Reviews"), div(class = "kpi-value", paste0(kpis$Neu_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neu_Count, "reviews")))),
-      column(width = 3, div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Negative Reviews"), div(class = "kpi-value", paste0(kpis$Neg_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neg_Count, "reviews"))))
-    )
+    if (is.null(rv$sentiment_data)) {
+      div(
+        class = "kpi-grid",
+        div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Reviews"), div(class = "kpi-value", "—"), div(class = "kpi-subtext", "Upload dataset to calculate")),
+        div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Positive Reviews"), div(class = "kpi-value", "—"), div(class = "kpi-subtext", "Awaiting sentiment analysis")),
+        div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Neutral Reviews"), div(class = "kpi-value", "—"), div(class = "kpi-subtext", "Awaiting sentiment analysis")),
+        div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Negative Reviews"), div(class = "kpi-value", "—"), div(class = "kpi-subtext", "Awaiting sentiment analysis"))
+      )
+    } else {
+      kpis <- calculate_sentiment_kpis(rv$sentiment_data)
+      
+      div(
+        class = "kpi-grid",
+        div(class = "kpi-card kpi-total", div(class = "kpi-title", "Total Reviews"), div(class = "kpi-value", kpis$Total)),
+        div(class = "kpi-card kpi-pos", div(class = "kpi-title", "Positive Reviews"), div(class = "kpi-value", paste0(kpis$Pos_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Pos_Count, "reviews"))),
+        div(class = "kpi-card kpi-neu", div(class = "kpi-title", "Neutral Reviews"), div(class = "kpi-value", paste0(kpis$Neu_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neu_Count, "reviews"))),
+        div(class = "kpi-card kpi-neg", div(class = "kpi-title", "Negative Reviews"), div(class = "kpi-value", paste0(kpis$Neg_Pct, "%")), div(class = "kpi-subtext", paste(kpis$Neg_Count, "reviews")))
+      )
+    }
   })
 
   output$plot_dash_sentiment <- renderPlot({
