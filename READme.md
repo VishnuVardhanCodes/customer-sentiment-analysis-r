@@ -1,299 +1,275 @@
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
 
-![Project Domain](https://img.shields.io/badge/Domain-Data%20Analytics-blue.svg)
-![Primary Language](https://img.shields.io/badge/Language-R%20Programming-blue.svg)
-![Framework](https://img.shields.io/badge/Framework-R%20Shiny-green.svg)
-![License](https://img.shields.io/badge/License-MIT-orange.svg)
-
-An academic Data Analytics R Shiny web application designed for processing, mining, and analyzing customer feedback and social media text data.
+Academic Data Analytics Project
 
 ---
 
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Project Objective](#project-objective)
-3. [Key Features](#key-features)
-4. [Technologies Used & R Packages](#technologies-used--r-packages)
-5. [System Workflow](#system-workflow)
-6. [Expected Dataset Format](#expected-dataset-format)
-7. [Text Preprocessing](#text-preprocessing)
-8. [Text Mining & TF-IDF](#text-mining--tf-idf)
-9. [Sentiment Analysis](#sentiment-analysis)
-10. [Supervised Machine Learning](#supervised-machine-learning)
-11. [Model Evaluation](#model-evaluation)
-12. [Visualization](#visualization)
-13. [Customer Insights](#customer-insights)
-14. [Installation & How to Run](#installation--how-to-run)
-15. [Project Folder Structure](#project-folder-structure)
-16. [Example Workflow](#example-workflow)
-17. [Future Enhancements](#future-enhancements)
+## 1. Project Title & Objective
+
+**Project Title:** LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R  
+**Domain:** Data Analytics & Natural Language Processing (NLP)  
+**Objective:** Transform raw social media customer feedback and reviews into actionable business intelligence using statistical text mining, TF-IDF feature extraction, lexicon-based sentiment analysis, supervised machine learning (Naive Bayes, SVM, KNN), and dynamic SaaS dashboard visualizations.
 
 ---
 
-## Project Overview
+## 2. Core Architecture
 
-"LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R" is an R-based Data Analytics application. The platform transforms raw customer reviews, social media posts, and feedback comments into structured business intelligence through text mining algorithms, lexicon-based sentiment analysis, supervised machine learning models, and dynamic visualizations.
-
-> **Academic Rule:**
-> If a dataset contains a ground-truth sentiment column (e.g. `sentiment`, `label`, `polarity`), the system splits data into 80% train / 20% test sets using `set.seed(123)` and trains **Naive Bayes**, **Support Vector Machine (SVM)**, and **K-Nearest Neighbors (KNN)** algorithms. If no label exists, the system performs lexicon-based sentiment analysis and informs the user that supervised evaluation requires labeled training data.
-
----
-
-## Project Objective
-
-1. Accept customer feedback CSV or TXT datasets.
-2. Validate dataset integrity, missing values, duplicates, and column availability.
-3. Automatically detect text and sentiment label columns.
-4. Preprocess text: lowercasing, URL/email/@mention removal, hashtag handling, punctuation/digit removal, stopword filtering, and Porter stemming.
-5. Perform text mining: Calculate Word Frequencies and Term Frequency-Inverse Document Frequency (TF-IDF).
-6. Generate dynamic Word Clouds and extract top keywords.
-7. Perform lexicon-based sentiment analysis to score and classify feedback into Positive, Neutral, and Negative categories.
-8. Train supervised machine learning models (Naive Bayes, SVM, KNN) when labeled data is provided.
-9. Evaluate model performance using Accuracy, Precision, Recall, F1-Score, and Confusion Matrices.
-10. Generate data-driven customer insights and actionable business recommendations.
-11. Allow users to export processed datasets, sentiment scores, metrics, and summary reports.
-
----
-
-## Key Features
-
-- **Automated Column Detection**: Intelligent identification of feedback columns (`review`, `review_text`, `comment`, `feedback`, `text`, etc.).
-- **Interactive Preprocessing Comparison**: Displays side-by-side tables comparing original text with cleaned tokens.
-- **TF-IDF Term Extraction**: Ranks document terms by average TF-IDF importance.
-- **Multi-Model Supervised ML**: Evaluates Naive Bayes (`e1071`), SVM (`e1071`), and KNN (`class`).
-- **Reproducible Evaluation**: Enforces fixed random seed (`set.seed(123)`) and 80/20 train/test split.
-- **Dynamic Visualizations**: `ggplot2` bar charts, TF-IDF plots, confusion matrix heatmaps, and base R word clouds.
-- **Executive Customer Insights**: Dynamic narrative summarizing customer sentiment, top praise themes, common complaint topics, and data-backed recommendations.
-- **Export Capabilities**: CSV downloads for processed datasets, sentiment scores, and model comparison metrics.
-
----
-
-## Technologies Used & R Packages
-
-- **Core Language**: R Programming Language
-- **UI Framework**: R Shiny (`shiny`, `bslib`)
-- **Data Manipulation**: `dplyr`, `readr`, `stringr`, `tidyr`
-- **Text Processing & Mining**: `tidytext`, `tm`, `SnowballC`, `syuzhet`
-- **Machine Learning**: `e1071`, `class`, `Matrix`, `caret`
-- **Visualization**: `ggplot2`, `wordcloud`, `wordcloud2`, `RColorBrewer`
-- **Interactive Tables**: `DT`
-
----
-
-## System Workflow
+The application is structured into a decoupled **React Frontend** and **R Plumber REST API Backend**:
 
 ```
-USER
-  ↓
-UPLOAD CSV / TXT FILE
-  ↓
-DATA VALIDATION & COLUMN DETECTION
-  ↓
-TEXT PREPROCESSING (Cleaning, Stopwords, Stemming)
-  ↓
-┌─────────────────────────────────┐
-│                                 │
-↓                                 ↓
-TEXT MINING                  SENTIMENT ANALYSIS
-├── Word Frequency            ├── Positive
-├── TF-IDF                    ├── Neutral
-├── Keywords                  └── Negative
-└── Word Cloud
-│                                 │
-└────────────────┬────────────────┘
-                 ↓
-      SUPERVISED MACHINE LEARNING (If Labeled)
-       Naive Bayes / SVM / KNN
-                 ↓
-         MODEL EVALUATION
-       Accuracy / Precision / Recall / F1 / Confusion Matrix
-                 ↓
-           VISUALIZATION
-                 ↓
-         CUSTOMER INSIGHTS
-                 ↓
-          EXPORT RESULTS
+                    USER
+                     |
+                     v
+              REACT FRONTEND (Port 3000)
+                     |
+                     | HTTP / REST API (JSON)
+                     v
+              R PLUMBER API (Port 8000)
+                     |
+          +----------+----------+
+          |          |          |
+          v          v          v
+     PREPROCESSING TEXT MINING SENTIMENT
+          |          |          |
+          +----------+----------+
+                     |
+                     v
+             MACHINE LEARNING
+              NB / SVM / KNN
+                     |
+                     v
+             MODEL EVALUATION
+                     |
+                     v
+              VISUALIZATION
+                     |
+                     v
+             CUSTOMER INSIGHTS
 ```
 
----
+### Responsibility Matrix
 
-## Expected Dataset Format
-
-The application accepts both **labeled** and **unlabeled** CSV or TXT datasets:
-
-### Labeled Dataset Example (`data/sample/sample_reviews.csv`)
-| review_id | review_text | sentiment |
-|---|---|---|
-| REV_001 | The product quality is outstanding! Fast delivery! | Positive |
-| REV_002 | Terrible service. Item arrived damaged. | Negative |
-| REV_003 | Average experience. Works okay. | Neutral |
-
-### Unlabeled Dataset Example (`data/sample/sample_unlabeled.csv`)
-| review_id | review_text |
-|---|---|
-| UNL_001 | Superb customer support and high efficiency! |
-| UNL_002 | Delayed shipment without any tracking update. |
+* **Frontend (React.js):** UI rendering, navigation, interactive forms, drag-and-drop file upload, pipeline stepper, Recharts data visualization, status badges, toast notifications, download triggers.
+* **Backend (R Plumber):** Data loading, quality validation, text preprocessing (`tm`, `stringr`, `SnowballC`), term frequency & TF-IDF computation (`tidytext`), lexicon sentiment scoring (`syuzhet` Bing lexicon), supervised ML classification (`e1071`, `class`), model evaluation matrix, and dynamic customer insights generation.
 
 ---
 
-## Text Preprocessing
+## 3. Technology Stack
 
-The preprocessing pipeline in `R/preprocessing.R` performs the following steps:
-1. Lowers text case.
-2. Removes URLs (`http://`, `https://`, `www`).
-3. Removes email addresses.
-4. Removes Twitter/Social Media `@mentions`.
-5. Strips hashtag `#` symbols while keeping tag text.
-6. Removes punctuation and numeric digits.
-7. Strips non-ASCII special characters.
-8. Removes extra whitespaces.
-9. Filters standard English stop words (`tm::stopwords("english")`).
-10. Tokenizes and applies Porter Stemming (`SnowballC::wordStem`).
+* **Frontend:** React.js, React Router v6, Axios, Recharts, Lucide React Icons, Vanilla CSS (Design Tokens & Utility System).
+* **Backend:** R (v4.6.1+), R Plumber (`plumber`), `dplyr`, `tidytext`, `tm`, `SnowballC`, `syuzhet`, `e1071`, `class`, `readr`, `jsonlite`.
 
 ---
 
-## Text Mining & TF-IDF
-
-- **Word Frequency**: Computes exact term occurrence counts across the corpus.
-- **TF-IDF (Term Frequency-Inverse Document Frequency)**: Evaluates term uniqueness and document weight using `tidytext::bind_tf_idf`.
-- **Word Cloud**: Renders visual representation of high-frequency words.
-
----
-
-## Sentiment Analysis
-
-Lexicon-based sentiment scoring evaluates per-review valence using the Bing dictionary in `syuzhet`:
-- **Positive**: `Sentiment_Score > 0`
-- **Neutral**: `Sentiment_Score == 0`
-- **Negative**: `Sentiment_Score < 0`
-
----
-
-## Supervised Machine Learning
-
-When a ground-truth label exists:
-1. Feature Matrix: Sparse TF-IDF Document-Term Matrix (DTM).
-2. Data Split: 80% Train, 20% Test with `set.seed(123)`.
-3. Models Trained:
-   - **Naive Bayes**: `e1071::naiveBayes`
-   - **Support Vector Machine (SVM)**: `e1071::svm` (Linear Kernel)
-   - **K-Nearest Neighbors (KNN)**: `class::knn` (K=5)
-
----
-
-## Model Evaluation
-
-Supervised performance metrics calculated on test set:
-- **Accuracy**: Proportion of correctly predicted labels.
-- **Precision**: Macro-averaged positive predictive value.
-- **Recall**: Macro-averaged sensitivity/true positive rate.
-- **F1-Score**: Harmonic mean of Precision and Recall (`2 * (P * R) / (P + R)`).
-- **Confusion Matrix**: Tabular and heatmap rendering of Actual vs. Predicted classes.
-
----
-
-## Visualization
-
-Dynamic `ggplot2` charts:
-- Sentiment Distribution Bar Chart
-- Top 20 Word Frequency Chart
-- Top 20 TF-IDF Term Importance Chart
-- Machine Learning Model Comparison Grouped Bar Chart
-- Confusion Matrix Heatmaps
-
----
-
-## Customer Insights
-
-Automated rule-based executive narrative (`R/insights.R`):
-- Overall sentiment dominance statement.
-- Positive theme highlights ("What Customers Like").
-- Negative theme highlights ("What Customers Dislike / Common Issues").
-- Operational recommendations (e.g. logistics audits for delivery complaints, support workflow upgrades for refund issues).
-
----
-
-## Installation & How to Run
-
-### Prerequisites
-- R (version 4.0 or higher)
-- RStudio (recommended) or R terminal
-
-### 1. Install Dependencies
-Run the installation script in R:
-```r
-source("requirements.R")
-```
-
-### 2. Launch the Application
-Run the R Shiny application:
-```r
-library(shiny)
-runApp("app.R")
-```
-Alternatively, open `app.R` in RStudio and click **Run App**.
-
----
-
-## Project Folder Structure
+## 4. Required Project Structure
 
 ```
 customer-sentiment-analysis-r/
-│
-├── app.R                       # Main R Shiny Application Script
-│
-├── R/                          # Modular Backend Code
-│   ├── preprocessing.R         # Text cleaning, stopword removal, stemming
-│   ├── text_mining.R           # Word counts, DTM, TF-IDF calculation
-│   ├── sentiment_analysis.R    # Lexicon sentiment scoring & classification
-│   ├── machine_learning.R      # TF-IDF matrix split, NB, SVM, KNN model training
-│   ├── evaluation.R           # Metrics calculation & confusion matrix
-│   ├── visualization.R         # ggplot2 charts, confusion heatmaps, word clouds
-│   └── insights.R              # Executive insights & recommendations generator
-│
-├── data/                       # Datasets
-│   ├── raw/
-│   ├── processed/
-│   └── sample/
-│       ├── sample_reviews.csv   # Labeled sample dataset
-│       └── sample_unlabeled.csv # Unlabeled sample dataset
-│
-├── outputs/                    # Export Directory
-│   ├── results/
-│   ├── plots/
-│   └── reports/
-│
-├── www/                        # UI Web Assets
-│   └── styles.css              # Custom CSS theme
-│
-├── README.md                   # Project Documentation
-├── requirements.R              # Dependency installation script
-├── .gitignore                  # Git exclusion rules
-└── LICENSE                     # MIT License
+    frontend/
+        package.json
+        vite.config.js
+        index.html
+        .env
+        .env.example
+        src/
+            components/
+                Sidebar.jsx
+                TopNavbar.jsx
+                PageHeader.jsx
+                KpiCard.jsx
+                StatusBadge.jsx
+                WorkflowStepper.jsx
+                UploadZone.jsx
+                DatasetInfoCard.jsx
+                ValidationTable.jsx
+                DataPreviewTable.jsx
+                ChartCard.jsx
+                EmptyState.jsx
+                LoadingState.jsx
+                ErrorState.jsx
+                ModelCard.jsx
+                MetricCard.jsx
+                InsightCard.jsx
+                DownloadCard.jsx
+                ConfirmationModal.jsx
+                ToastNotification.jsx
+            pages/
+                Dashboard.jsx
+                UploadData.jsx
+                DataValidation.jsx
+                Preprocessing.jsx
+                TextMining.jsx
+                SentimentAnalysis.jsx
+                MachineLearning.jsx
+                ModelEvaluation.jsx
+                Visualization.jsx
+                CustomerInsights.jsx
+                ResultsDownload.jsx
+            layouts/
+                MainLayout.jsx
+            charts/
+                SentimentDonutChart.jsx
+                WordFreqChart.jsx
+                TfidfChart.jsx
+                ModelComparisonChart.jsx
+                ConfusionMatrixHeatmap.jsx
+                WordCloudView.jsx
+            services/
+                api.js
+            context/
+                AnalysisContext.jsx
+            styles/
+                index.css
+                layout.css
+                components.css
+            App.jsx
+            main.jsx
+        public/
+
+    backend/
+        plumber.R
+        run_plumber.R
+        R/
+            preprocessing.R
+            text_mining.R
+            sentiment_analysis.R
+            machine_learning.R
+            evaluation.R
+            visualization.R
+            insights.R
+            validation.R
+            helpers.R
+        data/
+            sample/
+                sample_reviews.csv
+                sample_unlabeled.csv
+        outputs/
+
+    requirements.R
+    README.md
+    .gitignore
 ```
 
 ---
 
-## Example Workflow
+## 5. Installation & Setup Instructions
 
-1. **Launch App**: Open Shiny interface.
-2. **Demo Mode**: Click **"Demo: Load Sample Labeled Data"** on the Dashboard tab.
-3. **Data Validation**: Verify record counts, column detection, and label availability.
-4. **Preprocessing**: Click **"Run Preprocessing Pipeline"**.
-5. **Text Mining**: Explore Word Frequency, TF-IDF, and Word Cloud tabs.
-6. **Sentiment Analysis**: Click **"Run Lexicon Sentiment Analysis"**.
-7. **Machine Learning**: Click **"Run Supervised ML Models"** to train NB, SVM, KNN.
-8. **Model Evaluation**: Compare Accuracy, Precision, Recall, F1-Score, and Confusion Matrices.
-9. **Customer Insights**: Read executive narrative and actionable recommendations.
-10. **Export**: Download processed dataset CSV and summary reports.
+### Prerequisites
+
+* **R (v4.0.0 or higher)** installed.
+* **Node.js (v18.0.0 or higher)** and `npm` installed.
+
+### Step 1: Install R Dependencies
+
+Run the dependency checker script using `Rscript`:
+
+```bash
+Rscript requirements.R
+```
+
+### Step 2: Install Frontend Dependencies
+
+Navigate to the `frontend` folder and install Node packages:
+
+```bash
+cd frontend
+npm install
+```
 
 ---
 
-## Future Enhancements
+## 6. How to Run the Application
 
-- Deep learning models (BERT / RoBERTa via R `reticulate` / torch).
-- Aspect-based sentiment analysis (ABSA).
-- Real-time Twitter API streaming integration.
+### Start the R Plumber API Backend (Port 8000)
+
+From the project root:
+
+```bash
+cd backend
+Rscript run_plumber.R
+```
+
+The R backend API will start on `http://127.0.0.1:8000` with Swagger docs available at `http://127.0.0.1:8000/__docs__/`.
+
+### Start the React Frontend Application (Port 3000)
+
+In a new terminal window:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Open your browser and navigate to `http://localhost:3000`.
 
 ---
-*LG9 Academic Data Analytics Project - Built with R & R Shiny.*
+
+## 7. API Endpoints Reference
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/health` | Check R Plumber API status and session health |
+| `POST` | `/upload` | Upload and parse raw CSV/TXT customer dataset |
+| `POST` | `/validate` | Execute data quality checks & select target columns |
+| `POST` | `/preprocess` | Run text normalization, stopword filtering, and Porter stemming |
+| `POST` | `/text-mining` | Calculate word frequencies, DTM, and TF-IDF weights |
+| `POST` | `/sentiment` | Perform lexicon-based Syuzhet Bing sentiment scoring |
+| `POST` | `/train/naive-bayes` | Train Naive Bayes model on TF-IDF features |
+| `POST` | `/train/svm` | Train Linear Support Vector Machine (SVM) model |
+| `POST` | `/train/knn` | Train K-Nearest Neighbors (KNN) model |
+| `POST` | `/train/all` | Train and compare all 3 supervised ML models |
+| `GET` | `/evaluate` | Fetch comparative evaluation metrics & confusion matrices |
+| `GET` | `/visualization-data` | Fetch pre-computed payloads for Recharts frontend |
+| `GET` | `/insights` | Generate dynamic opinion insights and strategic recommendations |
+| `GET` | `/results` | Fetch overall pipeline status and KPI metrics |
+| `GET` | `/download/processed` | Download preprocessed dataset CSV |
+| `GET` | `/download/sentiment` | Download sentiment results CSV |
+| `GET` | `/download/models` | Download model evaluation summary CSV |
+| `GET` | `/download/insights` | Download executive insights report TXT |
+| `GET` | `/download/complete` | Download complete combined analysis CSV |
+| `POST` | `/reset` | Reset current analysis session |
+| `POST` | `/demo/labeled` | Run full end-to-end supervised demo workflow |
+| `POST` | `/demo/unlabeled` | Run end-to-end unsupervised demo workflow |
+
+---
+
+## 8. Dataset Format & Demos
+
+### Labeled Dataset Format (.CSV)
+Requires text column and optional sentiment ground-truth label:
+```csv
+"review_id","review_text","sentiment"
+"REV_001","The product quality is outstanding! Fast delivery and great support.","Positive"
+"REV_002","Terrible service. Package arrived damaged. Very disappointed!","Negative"
+```
+
+### Unlabeled Dataset Format (.CSV / .TXT)
+```csv
+"review_id","review_text"
+"UNL_001","The product quality is fantastic! Fast shipping."
+```
+
+### Running Demos from UI
+* **Run Labeled Demo:** Loads `sample_reviews.csv` (100 reviews), runs preprocessing, text mining, sentiment analysis, NB, SVM, KNN training, evaluation, and insights.
+* **Run Unlabeled Demo:** Loads `sample_unlabeled.csv` (50 reviews), runs preprocessing, text mining, lexicon sentiment scoring, visualizations, and insights. Supervised ML displays `UNAVAILABLE` adhering to academic integrity.
+
+---
+
+## 9. Academic Methodology
+
+1. **Text Preprocessing:** Lowercase conversion, regex cleaning of URLs (`https?://\S+`), emails, `@mentions`, hashtags, punctuation, and digits, followed by English stopword removal (`tm::stopwords`) and Porter stemming (`SnowballC::wordStem`).
+2. **Text Mining & TF-IDF:** Tokenization via `tidytext::unnest_tokens`, term frequency computation, and Inverse Document Frequency (IDF) weighting:
+   $$\text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \log\left(\frac{|D|}{|\{d \in D : t \in d\}|}\right)$$
+3. **Sentiment Analysis:** Unsupervised lexicon scoring using Syuzhet Bing dictionary ($S > 0 \implies \text{Positive}$, $S < 0 \implies \text{Negative}$, $S = 0 \implies \text{Neutral}$).
+4. **Supervised ML Classification:** 80/20 train/test split on sparse TF-IDF Document-Term Matrix (DTM) evaluated across Naive Bayes, Linear Support Vector Machines (SVM), and K-Nearest Neighbors (KNN).
+5. **Evaluation Metrics:** Accuracy, Macro-Precision, Macro-Recall, Macro F1-Score, and Confusion Matrix Heatmaps:
+   $$\text{F1-Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
+
+---
+
+## 10. Future Scope
+
+* Multi-language text mining and translation capabilities.
+* Aspect-based sentiment analysis (ABSA) for fine-grained feature sentiment.
+* Integration of deep learning transformer models (BERT, RoBERTa).
+* Real-time streaming API connectors for Twitter/X, Reddit, and Amazon API data.

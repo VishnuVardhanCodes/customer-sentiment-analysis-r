@@ -1,28 +1,21 @@
-# R environment files
+# R Artifacts
+.Rproj.user
 .Rhistory
 .RData
-.Rproj.user/
-*.Rproj
+.Ruserdata
 
-# Data directories (keep sample, ignore raw/processed)
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
+# Node & Frontend
+node_modules
+dist
+frontend/node_modules
+frontend/dist
+.env.local
 
-# Output files
-outputs/results/*
-!outputs/results/.gitkeep
-outputs/plots/*
-!outputs/plots/.gitkeep
-outputs/reports/*
-!outputs/reports/.gitkeep
+# Outputs & Uploads
+outputs/*.csv
+outputs/*.txt
+!outputs/.gitkeep
 
-# Operating system files
-Thumbs.db
-Desktop.ini
+# OS Files
 .DS_Store
-
-# Temporary files
-*.tmp
-*.log
+Thumbs.db
