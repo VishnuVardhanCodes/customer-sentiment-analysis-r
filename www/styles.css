@@ -12,6 +12,7 @@
   --accent-blue: #2563eb;
   --accent-blue-hover: #1d4ed8;
   --accent-indigo: #4f46e5;
+  --accent-teal: #0d9488;
   --accent-purple: #7c3aed;
   --background: #f8fafc;
   --card-bg: #ffffff;
@@ -88,7 +89,7 @@ body {
   background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-indigo) 100%);
   color: #ffffff;
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   padding: 0.45rem 0.85rem;
   border-radius: var(--radius-md);
   letter-spacing: 0.08em;
@@ -99,7 +100,7 @@ body {
 }
 
 .top-header-titles h1 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
   margin: 0;
   color: #ffffff;
@@ -108,7 +109,7 @@ body {
 }
 
 .top-header-titles p {
-  font-size: 0.8rem;
+  font-size: 0.775rem;
   color: #94a3b8;
   margin: 0;
   font-weight: 500;
@@ -404,49 +405,6 @@ body {
   font-weight: 700;
 }
 
-/* Compact Step Progress Bar */
-.compact-progress-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 2rem;
-  padding: 0.4rem 0.85rem;
-  margin-bottom: 1.25rem;
-  overflow-x: auto;
-  box-shadow: var(--shadow-xs);
-}
-
-.progress-step-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  padding: 0.2rem 0.55rem;
-  border-radius: 1rem;
-  white-space: nowrap;
-}
-
-.progress-step-pill.is-active {
-  background: var(--info-bg);
-  color: var(--accent-blue);
-  font-weight: 700;
-  border: 1px solid var(--info-border);
-}
-
-.progress-step-pill.is-completed {
-  color: var(--success);
-  font-weight: 700;
-}
-
-.progress-step-arrow {
-  color: var(--text-light);
-  font-size: 0.65rem;
-}
-
 /* ==============================================================================
    4. CARDS & CONTAINER SYSTEM
    ============================================================================== */
@@ -632,6 +590,37 @@ body {
 .workflow-step-status.status-not-started {
   color: var(--text-muted);
   background: var(--primary-light);
+}
+
+/* Compact Preprocessing Process Flow Cards */
+.pipeline-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+  gap: 0.6rem;
+}
+
+.pipeline-step-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+}
+
+.pipeline-step-num {
+  font-size: 0.685rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.pipeline-step-name {
+  font-size: 0.785rem;
+  font-weight: 700;
+  color: var(--primary);
+  word-break: break-word;
 }
 
 /* ==============================================================================
@@ -878,6 +867,34 @@ body {
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--primary);
+}
+
+/* Unlabeled Warning Banner Card */
+.unlabeled-warning-card {
+  background: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%);
+  border: 1px solid var(--warning-border);
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.unlabeled-warning-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--warning-text);
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.unlabeled-warning-desc {
+  font-size: 0.9rem;
+  color: #78350f;
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* ==============================================================================
