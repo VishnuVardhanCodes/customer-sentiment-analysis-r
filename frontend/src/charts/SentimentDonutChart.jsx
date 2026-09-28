@@ -18,36 +18,40 @@ const SentimentDonutChart = ({ data }) => {
 
   const chartData = data.map((item) => ({
     name: item.Sentiment || item.name,
-    value: item.n || item.count || item.value || 0,
-    percentage: item.Percentage || item.percentage || 0,
+    value: Number(item.n ?? item.count ?? item.value ?? 0),
+    percentage: Number(item.Percentage ?? item.percentage ?? 0),
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={chartData}
-          cx="50%"
-          cy="50%"
-          innerRadius={65}
-          outerRadius={95}
-          paddingAngle={4}
-          dataKey="value"
-        >
-          {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#2563eb'} />
-          ))}
-        </Pie>
-        <Tooltip
-          formatter={(value, name, props) => [
-            `${value} reviews (${props.payload.percentage}%)`,
-            name,
-          ]}
-          contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-        />
-        <Legend verticalAlign="bottom" height={36} />
-      </PieChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: 320, position: 'relative' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="45%"
+            innerRadius={60}
+            outerRadius={95}
+            paddingAngle={4}
+            dataKey="value"
+            nameKey="name"
+            isAnimationActive={true}
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#2563eb'} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value, name, props) => [
+              `${value} reviews (${props.payload?.percentage || 0}%)`,
+              name,
+            ]}
+            contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+          />
+          <Legend verticalAlign="bottom" height={36} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

@@ -19,18 +19,20 @@ const TfidfChart = ({ data, limit = 15 }) => {
     .reverse();
 
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <BarChart layout="vertical" data={chartData} margin={{ top: 10, right: 30, left: 40, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-        <XAxis type="number" stroke="#64748b" tickFormatter={(v) => v.toFixed(3)} />
-        <YAxis dataKey="term" type="category" stroke="#64748b" width={90} tick={{ fontSize: 12 }} />
-        <Tooltip
-          formatter={(val) => [val.toFixed(4), 'Mean TF-IDF Weight']}
-          contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-        />
-        <Bar dataKey="score" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: 320, position: 'relative' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart layout="vertical" data={chartData} margin={{ top: 10, right: 30, left: 40, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+          <XAxis type="number" stroke="#64748b" tickFormatter={(v) => v.toFixed(3)} />
+          <YAxis dataKey="term" type="category" stroke="#64748b" width={90} tick={{ fontSize: 12 }} />
+          <Tooltip
+            formatter={(val) => [val.toFixed(4), 'Mean TF-IDF Weight']}
+            contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+          />
+          <Bar dataKey="score" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

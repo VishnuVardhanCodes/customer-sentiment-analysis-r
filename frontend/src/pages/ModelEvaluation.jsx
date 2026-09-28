@@ -190,7 +190,7 @@ const ModelEvaluation = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Select Model:</span>
               <select
-                value={selectedModel}
+                value={String(selectedModel || '')}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 style={{
                   padding: '0.35rem 0.65rem',

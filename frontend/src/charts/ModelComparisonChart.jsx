@@ -19,22 +19,24 @@ const ModelComparisonChart = ({ data }) => {
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={340}>
-      <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-        <XAxis dataKey="model" stroke="#475569" fontWeight={600} />
-        <YAxis domain={[0, 100]} stroke="#64748b" tickFormatter={(v) => `${v}%`} />
-        <Tooltip
-          formatter={(val) => [`${val}%`]}
-          contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-        />
-        <Legend />
-        <Bar dataKey="Accuracy" fill="#2563eb" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="Precision" fill="#0d9488" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="Recall" fill="#d97706" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="F1_Score" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: 340, position: 'relative' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ top: 15, right: 30, left: 10, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+          <XAxis dataKey="model" stroke="#475569" fontWeight={600} />
+          <YAxis domain={[0, 100]} stroke="#64748b" tickFormatter={(v) => `${v}%`} />
+          <Tooltip
+            formatter={(val) => [`${val}%`]}
+            contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+          />
+          <Legend />
+          <Bar dataKey="Accuracy" fill="#2563eb" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="Precision" fill="#0d9488" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="Recall" fill="#d97706" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="F1_Score" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
