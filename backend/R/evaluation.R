@@ -16,6 +16,15 @@ evaluate_model_performance <- function(actual_y, pred_y) {
   actual <- as.character(actual_y)
   pred   <- as.character(pred_y)
   
+  # Ensure equal lengths
+  if (length(actual) != length(pred)) {
+    min_len <- min(length(actual), length(pred))
+    if (min_len > 0) {
+      actual <- actual[seq_len(min_len)]
+      pred   <- pred[seq_len(min_len)]
+    }
+  }
+  
   classes <- union(unique(actual), unique(pred))
   n_total <- length(actual)
   

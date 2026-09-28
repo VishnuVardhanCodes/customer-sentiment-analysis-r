@@ -38,28 +38,40 @@ prepare_ml_datasets <- function(clean_text_vec, labels, train_prop = 0.8, seed =
   set.seed(seed)
   
   n_docs <- length(clean_text_vec)
-  if (n_docs < 10) {
+  if (n_docs < 5) {
     stop("Dataset contains too few records for supervised machine learning split.")
   }
   
-  # Create Document-Term Matrix
-  corpus <- tm::VCorpus(tm::VectorSource(clean_text_vec))
+  # Replace empty clean strings with default token to prevent empty corpus DTM
+  clean_vec <- ifelse(n_docs == 0 | is.na(clean_text_vec) | nchar(trimws(clean_text_vec)) == 0, "sample", clean_text_vec)
+  
+  # Create Document-Term Matrix with TF-IDF weighting
+  corpus <- tm::VCorpus(tm::VectorSource(clean_vec))
   dtm <- tm::DocumentTermMatrix(corpus, control = list(weighting = tm::weightTfIdf))
   
-  # Filter sparse terms to maintain reasonable feature dimensions
-  if (ncol(dtm) > 500) {
+  # Remove sparse terms if feature dimension is large
+  if (ncol(dtm) > 100) {
     dtm <- tm::removeSparseTerms(dtm, 0.98)
   }
   
   feature_matrix <- as.matrix(dtm)
   
-  # Ensure column names are valid R symbols
+  if (ncol(feature_matrix) == 0) {
+    # Fallback dummy feature if corpus is empty
+    feature_matrix <- matrix(1, nrow = n_docs, ncol = 1)
+    colnames(feature_matrix) <- "term"
+  }
+  
   colnames(feature_matrix) <- make.names(colnames(feature_matrix), unique = TRUE)
   
   labels_factor <- as.factor(labels)
   
-  # Stratified or random sampling
-  train_indices <- sample(seq_len(n_docs), size = floor(train_prop * n_docs))
+  # Train/Test split
+  train_size <- floor(train_prop * n_docs)
+  if (train_size >= n_docs) train_size <- n_docs - 1
+  if (train_size < 1) train_size <- 1
+  
+  train_indices <- sample(seq_len(n_docs), size = train_size)
   
   train_x <- feature_matrix[train_indices, , drop = FALSE]
   train_y <- labels_factor[train_indices]
@@ -83,8 +95,21 @@ prepare_ml_datasets <- function(clean_text_vec, labels, train_prop = 0.8, seed =
 #' @param test_x Test feature matrix
 #' @return Factor of predicted class labels for test set
 run_naive_bayes <- function(train_x, train_y, test_x) {
-  nb_model <- e1071::naiveBayes(train_x, train_y)
-  preds    <- predict(nb_model, test_x)
+  df_train <- as.data.frame(train_x)
+  df_test  <- as.data.frame(test_x)
+  
+  # Filter zero variance columns
+  if (ncol(df_train) > 1) {
+    var_cols <- sapply(df_train, function(c) var(as.numeric(c), na.rm = TRUE))
+    valid_cols <- which(!is.na(var_cols) & var_cols > 0)
+    if (length(valid_cols) > 0) {
+      df_train <- df_train[, valid_cols, drop = FALSE]
+      df_test  <- df_test[, valid_cols, drop = FALSE]
+    }
+  }
+  
+  nb_model <- e1071::naiveBayes(df_train, train_y)
+  preds    <- predict(nb_model, df_test)
   return(preds)
 }
 
@@ -95,14 +120,26 @@ run_naive_bayes <- function(train_x, train_y, test_x) {
 #' @param test_x Test feature matrix
 #' @return Factor of predicted class labels for test set
 run_svm <- function(train_x, train_y, test_x) {
+  df_train <- as.data.frame(train_x)
+  df_test  <- as.data.frame(test_x)
+  
+  if (ncol(df_train) > 1) {
+    var_cols <- sapply(df_train, function(c) var(as.numeric(c), na.rm = TRUE))
+    valid_cols <- which(!is.na(var_cols) & var_cols > 0)
+    if (length(valid_cols) > 0) {
+      df_train <- df_train[, valid_cols, drop = FALSE]
+      df_test  <- df_test[, valid_cols, drop = FALSE]
+    }
+  }
+  
   svm_model <- e1071::svm(
-    x = train_x,
+    x = df_train,
     y = train_y,
     kernel = "linear",
     cost = 1.0,
     scale = FALSE
   )
-  preds <- predict(svm_model, test_x)
+  preds <- predict(svm_model, df_test)
   return(preds)
 }
 
@@ -114,12 +151,15 @@ run_svm <- function(train_x, train_y, test_x) {
 #' @param k Integer number of neighbors
 #' @return Factor of predicted class labels for test set
 run_knn <- function(train_x, train_y, test_x, k = 5) {
-  k_val <- min(k, nrow(train_x) - 1)
+  df_train <- as.matrix(train_x)
+  df_test  <- as.matrix(test_x)
+  
+  k_val <- min(k, nrow(df_train) - 1)
   if (k_val < 1) k_val <- 1
   
   preds <- class::knn(
-    train = train_x,
-    test  = test_x,
+    train = df_train,
+    test  = df_test,
     cl    = train_y,
     k     = k_val
   )

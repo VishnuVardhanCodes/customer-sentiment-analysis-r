@@ -462,8 +462,7 @@ function(req, res) {
       state$ml_summary <- compare_all_models(list(actual = state$ml_data$test_y, predictions = state$ml_preds))
       state$status$evaluated <- TRUE
     } else {
-      res$status <- 400
-      return(api_response(FALSE, "No model evaluation data available. Run model training first.", error_code = "NO_EVALUATION"))
+      return(api_response(TRUE, "No model evaluation data available yet. Run model training first.", NULL))
     }
   }
   

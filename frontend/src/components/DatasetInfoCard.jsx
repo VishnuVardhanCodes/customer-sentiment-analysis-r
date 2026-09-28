@@ -79,7 +79,7 @@ const DatasetInfoCard = ({
             Customer Text Column (Required):
           </label>
           <select
-            value={textColumn}
+            value={String(textColumn || '')}
             onChange={(e) => setTextColumn(e.target.value)}
             style={{
               width: '100%',
@@ -91,8 +91,8 @@ const DatasetInfoCard = ({
             }}
           >
             {columns.map((col) => (
-              <option key={`text-${col}`} value={col}>
-                {col}
+              <option key={`text-${col}`} value={String(col)}>
+                {String(col)}
               </option>
             ))}
           </select>
@@ -104,7 +104,7 @@ const DatasetInfoCard = ({
             Sentiment Ground-Truth Label (Optional):
           </label>
           <select
-            value={labelColumn || 'none'}
+            value={String(labelColumn || 'none')}
             onChange={(e) => setLabelColumn(e.target.value === 'none' ? '' : e.target.value)}
             style={{
               width: '100%',
@@ -117,8 +117,8 @@ const DatasetInfoCard = ({
           >
             <option value="none">-- None (Unlabeled Dataset) --</option>
             {columns.map((col) => (
-              <option key={`label-${col}`} value={col}>
-                {col}
+              <option key={`label-${col}`} value={String(col)}>
+                {String(col)}
               </option>
             ))}
           </select>
