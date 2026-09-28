@@ -46,17 +46,17 @@ export const api = {
   },
 
   runSentiment: async () => {
-    const res = await client.post('/sentiment');
+    const res = await client.post('/sentiment', {});
     return res.data;
   },
 
   runNaiveBayes: async () => {
-    const res = await client.post('/train/naive-bayes');
+    const res = await client.post('/train/naive-bayes', {});
     return res.data;
   },
 
   runSVM: async () => {
-    const res = await client.post('/train/svm');
+    const res = await client.post('/train/svm', {});
     return res.data;
   },
 
@@ -66,7 +66,7 @@ export const api = {
   },
 
   runAllModels: async () => {
-    const res = await client.post('/train/all');
+    const res = await client.post('/train/all', {});
     return res.data;
   },
 
@@ -91,17 +91,17 @@ export const api = {
   },
 
   resetAnalysis: async () => {
-    const res = await client.post('/reset');
+    const res = await client.post('/reset', {});
     return res.data;
   },
 
   runLabeledDemo: async () => {
-    const res = await client.post('/demo/labeled');
+    const res = await client.post('/demo/labeled', {});
     return res.data;
   },
 
   runUnlabeledDemo: async () => {
-    const res = await client.post('/demo/unlabeled');
+    const res = await client.post('/demo/unlabeled', {});
     return res.data;
   },
 

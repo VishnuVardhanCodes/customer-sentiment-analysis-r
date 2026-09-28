@@ -6,7 +6,7 @@ import PageHeader from '../components/PageHeader';
 import ModelCard from '../components/ModelCard';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
-import { Brain, PlayCircle, ArrowRight, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Brain, PlayCircle, ArrowRight, ShieldAlert } from 'lucide-react';
 
 const MachineLearning = () => {
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ const MachineLearning = () => {
     addToast,
     pipelineStatus,
     setPipelineStatus,
-    evaluationResults,
     setEvaluationResults,
   } = useAnalysis();
 
@@ -34,7 +33,19 @@ const MachineLearning = () => {
     knn: null,
   });
 
+  const isLabeled = pipelineStatus.is_labeled;
+  const isPreprocessed = pipelineStatus.preprocessed;
+
   const handleRunNB = async () => {
+    if (!isLabeled) {
+      addToast('Supervised machine learning requires a genuine sentiment label column.', 'warning');
+      return;
+    }
+    if (!isPreprocessed) {
+      addToast('Please run text preprocessing prior to model training.', 'warning');
+      return;
+    }
+
     setLoading(true);
     setLoadingText('Training Naive Bayes classifier on TF-IDF features in R...');
     setModelStatus((prev) => ({ ...prev, nb: 'Training' }));
@@ -44,6 +55,9 @@ const MachineLearning = () => {
         setModelMetrics((prev) => ({ ...prev, nb: res.data.metrics }));
         setModelStatus((prev) => ({ ...prev, nb: 'Completed' }));
         addToast('Naive Bayes training completed!', 'success');
+      } else {
+        setModelStatus((prev) => ({ ...prev, nb: 'Error' }));
+        addToast(res.message || 'Naive Bayes training failed.', 'warning');
       }
     } catch (err) {
       setModelStatus((prev) => ({ ...prev, nb: 'Error' }));
@@ -54,6 +68,15 @@ const MachineLearning = () => {
   };
 
   const handleRunSVM = async () => {
+    if (!isLabeled) {
+      addToast('Supervised machine learning requires a genuine sentiment label column.', 'warning');
+      return;
+    }
+    if (!isPreprocessed) {
+      addToast('Please run text preprocessing prior to model training.', 'warning');
+      return;
+    }
+
     setLoading(true);
     setLoadingText('Training Linear Support Vector Machine (SVM) model in R...');
     setModelStatus((prev) => ({ ...prev, svm: 'Training' }));
@@ -63,6 +86,9 @@ const MachineLearning = () => {
         setModelMetrics((prev) => ({ ...prev, svm: res.data.metrics }));
         setModelStatus((prev) => ({ ...prev, svm: 'Completed' }));
         addToast('SVM training completed!', 'success');
+      } else {
+        setModelStatus((prev) => ({ ...prev, svm: 'Error' }));
+        addToast(res.message || 'SVM training failed.', 'warning');
       }
     } catch (err) {
       setModelStatus((prev) => ({ ...prev, svm: 'Error' }));
@@ -73,6 +99,15 @@ const MachineLearning = () => {
   };
 
   const handleRunKNN = async () => {
+    if (!isLabeled) {
+      addToast('Supervised machine learning requires a genuine sentiment label column.', 'warning');
+      return;
+    }
+    if (!isPreprocessed) {
+      addToast('Please run text preprocessing prior to model training.', 'warning');
+      return;
+    }
+
     setLoading(true);
     setLoadingText('Training K-Nearest Neighbors (KNN, k=5) classifier in R...');
     setModelStatus((prev) => ({ ...prev, knn: 'Training' }));
@@ -82,6 +117,9 @@ const MachineLearning = () => {
         setModelMetrics((prev) => ({ ...prev, knn: res.data.metrics }));
         setModelStatus((prev) => ({ ...prev, knn: 'Completed' }));
         addToast('KNN training completed!', 'success');
+      } else {
+        setModelStatus((prev) => ({ ...prev, knn: 'Error' }));
+        addToast(res.message || 'KNN training failed.', 'warning');
       }
     } catch (err) {
       setModelStatus((prev) => ({ ...prev, knn: 'Error' }));
@@ -92,6 +130,15 @@ const MachineLearning = () => {
   };
 
   const handleRunAll = async () => {
+    if (!isLabeled) {
+      addToast('Supervised machine learning requires a genuine sentiment label column.', 'warning');
+      return;
+    }
+    if (!isPreprocessed) {
+      addToast('Please run text preprocessing prior to model training.', 'warning');
+      return;
+    }
+
     setLoading(true);
     setLoadingText('Executing Naive Bayes, SVM, and KNN training and comparative evaluation in R...');
     setModelStatus({ nb: 'Training', svm: 'Training', knn: 'Training' });
@@ -106,7 +153,6 @@ const MachineLearning = () => {
         }));
         setModelStatus({ nb: 'Completed', svm: 'Completed', knn: 'Completed' });
 
-        // Update metrics per model
         const compTable = res.data.comparison_table || [];
         const nbM = compTable.find((m) => m.Model === 'Naive Bayes');
         const svmM = compTable.find((m) => m.Model === 'SVM');
@@ -120,6 +166,9 @@ const MachineLearning = () => {
 
         addToast('All supervised machine-learning models trained successfully!', 'success');
         navigate('/evaluation');
+      } else {
+        setModelStatus({ nb: 'Error', svm: 'Error', knn: 'Error' });
+        addToast(res.message || 'Model training failed.', 'warning');
       }
     } catch (err) {
       setModelStatus({ nb: 'Error', svm: 'Error', knn: 'Error' });
@@ -147,8 +196,6 @@ const MachineLearning = () => {
     );
   }
 
-  const isLabeled = pipelineStatus.is_labeled;
-
   return (
     <div>
       <PageHeader
@@ -156,7 +203,7 @@ const MachineLearning = () => {
         subtitle="Supervised classification models: Naive Bayes, Support Vector Machine (SVM), and K-Nearest Neighbors (KNN)."
       >
         {isLabeled && (
-          <button className="btn btn-primary btn-md" onClick={handleRunAll} disabled={loading}>
+          <button className="btn btn-primary btn-md" onClick={handleRunAll} disabled={loading || !isPreprocessed}>
             <PlayCircle size={16} /> Run All Models
           </button>
         )}
@@ -196,6 +243,7 @@ const MachineLearning = () => {
             status={modelStatus.nb}
             metrics={modelMetrics.nb}
             loading={loading}
+            disabled={!isPreprocessed}
           />
 
           <ModelCard
@@ -206,6 +254,7 @@ const MachineLearning = () => {
             status={modelStatus.svm}
             metrics={modelMetrics.svm}
             loading={loading}
+            disabled={!isPreprocessed}
           />
 
           <ModelCard
@@ -216,6 +265,7 @@ const MachineLearning = () => {
             status={modelStatus.knn}
             metrics={modelMetrics.knn}
             loading={loading}
+            disabled={!isPreprocessed}
           />
         </div>
       )}

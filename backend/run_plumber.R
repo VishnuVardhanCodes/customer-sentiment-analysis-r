@@ -2,15 +2,23 @@
 # LG9 – R Plumber API Server Launcher (backend/run_plumber.R)
 # ==============================================================================
 
-user_lib1 <- file.path(Sys.getenv("LOCALAPPDATA"), "R", "win-library", "4.6")
-user_lib2 <- file.path(Sys.getenv("USERPROFILE"), "AppData", "Local", "R", "win-library", "4.6")
-user_lib3 <- file.path("C:", "Users", Sys.getenv("USERNAME"), "AppData", "Local", "R", "win-library", "4.6")
+user_dirs <- c(
+  "C:/Users/POLLA VISHNU VARDHAN/AppData/Local/R/win-library/4.6",
+  "C:/Users/POLLA VISHNU VARDHAN/AppData/Local/R/win-library/4.5",
+  "C:/Users/POLLA VISHNU VARDHAN/AppData/Local/R/win-library/4.4",
+  "C:/Users/POLLA VISHNU VARDHAN/Documents/R/win-library/4.6",
+  "C:/Users/POLLA VISHNU VARDHAN/Documents/R/win-library/4.5",
+  "C:/Users/POLLA VISHNU VARDHAN/Documents/R/win-library/4.4"
+)
 
-for (ulib in c(user_lib1, user_lib2, user_lib3)) {
-  if (dir.exists(ulib)) {
-    .libPaths(c(ulib, .libPaths()))
+for (p in user_dirs) {
+  if (dir.exists(p)) {
+    .libPaths(c(p, .libPaths()))
   }
 }
+
+cat("Current R libPaths:\n")
+print(.libPaths())
 
 suppressPackageStartupMessages({
   library(plumber)

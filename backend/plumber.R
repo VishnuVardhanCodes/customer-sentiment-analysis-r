@@ -100,7 +100,6 @@ function(req, res) {
     fsize <- 0
     
     if (!is.null(req$postBody) && nchar(req$postBody) > 0) {
-      # Handle JSON payload or raw text content
       json_body <- tryCatch(jsonlite::fromJSON(req$postBody), error = function(e) NULL)
       if (!is.null(json_body) && !is.null(json_body$file_content)) {
         fname <- if (!is.null(json_body$filename)) json_body$filename else "uploaded.csv"
@@ -111,7 +110,6 @@ function(req, res) {
     }
     
     if (is.null(df) && !is.null(post_data)) {
-      # Handle multipart file upload from plumber
       for (item in post_data) {
         if (inherits(item, "raw") || is.list(item)) {
           if (!is.null(item$filename)) fname <- item$filename
@@ -128,7 +126,6 @@ function(req, res) {
     }
     
     if (is.null(df) || nrow(df) == 0) {
-      res$status <- 400
       return(api_response(FALSE, "Failed to parse CSV/TXT file or file is empty.", error_code = "INVALID_FILE"))
     }
     
@@ -137,14 +134,12 @@ function(req, res) {
     state$filename <- fname
     state$file_size <- fsize
     
-    # Auto detect text & label columns
     state$text_col <- detect_text_column(df)
     state$label_col <- detect_label_column(df)
     
     state$status$uploaded <- TRUE
     state$status$is_labeled <- !is.null(state$label_col)
     
-    # Initial validation preview
     state$validation <- validate_dataset(df, state$text_col, state$label_col)
     state$status$validated <- TRUE
     
@@ -160,7 +155,6 @@ function(req, res) {
       preview = head(df, 15)
     ))
   }, error = function(e) {
-    res$status <- 500
     api_response(FALSE, paste("Error uploading file:", e$message), error_code = "UPLOAD_ERROR")
   })
 }
@@ -169,7 +163,6 @@ function(req, res) {
 #* @post /validate
 function(req, res) {
   if (is.null(state$raw_df)) {
-    res$status <- 400
     return(api_response(FALSE, "No dataset loaded. Please upload a dataset first.", error_code = "NO_DATASET"))
   }
   
@@ -192,11 +185,10 @@ function(req, res) {
   api_response(TRUE, "Data validation completed.", state$validation)
 }
 
-#* Preprocess text (lowercase, URLs, punctuation, stopwords, stemming)
+#* Preprocess text
 #* @post /preprocess
 function(req, res) {
   if (is.null(state$raw_df) || is.null(state$text_col)) {
-    res$status <- 400
     return(api_response(FALSE, "No text column selected for preprocessing.", error_code = "NO_TEXT_COL"))
   }
   
@@ -240,11 +232,10 @@ function(req, res) {
   ))
 }
 
-#* Perform Text Mining (Word Frequencies, TF-IDF, Keywords)
+#* Perform Text Mining
 #* @post /text-mining
 function(req, res) {
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Preprocessing must be run prior to text mining.", error_code = "NOT_PREPROCESSED"))
   }
   
@@ -270,11 +261,10 @@ function(req, res) {
   api_response(TRUE, "Text mining analysis completed.", state$text_mining)
 }
 
-#* Run Sentiment Analysis (Lexicon Syuzhet Bing)
+#* Run Sentiment Analysis
 #* @post /sentiment
 function(req, res) {
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Preprocessing required before running sentiment analysis.", error_code = "NOT_PREPROCESSED"))
   }
   
@@ -284,7 +274,6 @@ function(req, res) {
   
   state$status$sentiment_analyzed <- TRUE
   
-  # Format table output for React frontend
   review_results <- state$sentiment_df %>%
     mutate(Row_ID = row_number()) %>%
     select(Row_ID, all_of(state$text_col), cleaned_text, Sentiment_Score, Sentiment, everything())
@@ -301,11 +290,9 @@ function(req, res) {
 #* @post /train/naive-bayes
 function(req, res) {
   if (is.null(state$status$is_labeled) || !state$status$is_labeled) {
-    res$status <- 400
     return(api_response(FALSE, "Supervised machine learning requires a genuine sentiment label column.", error_code = "MISSING_LABEL"))
   }
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Preprocessed dataset required for model training.", error_code = "NOT_PREPROCESSED"))
   }
   
@@ -331,7 +318,6 @@ function(req, res) {
       confusion_matrix = eval_res$Confusion_Matrix_DF
     ))
   }, error = function(e) {
-    res$status <- 500
     api_response(FALSE, paste("Naive Bayes training error:", e$message), error_code = "TRAIN_ERROR")
   })
 }
@@ -340,11 +326,9 @@ function(req, res) {
 #* @post /train/svm
 function(req, res) {
   if (is.null(state$status$is_labeled) || !state$status$is_labeled) {
-    res$status <- 400
     return(api_response(FALSE, "Supervised machine learning requires a genuine sentiment label column.", error_code = "MISSING_LABEL"))
   }
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Preprocessed dataset required for model training.", error_code = "NOT_PREPROCESSED"))
   }
   
@@ -370,7 +354,6 @@ function(req, res) {
       confusion_matrix = eval_res$Confusion_Matrix_DF
     ))
   }, error = function(e) {
-    res$status <- 500
     api_response(FALSE, paste("SVM training error:", e$message), error_code = "TRAIN_ERROR")
   })
 }
@@ -379,11 +362,9 @@ function(req, res) {
 #* @post /train/knn
 function(req, res) {
   if (is.null(state$status$is_labeled) || !state$status$is_labeled) {
-    res$status <- 400
     return(api_response(FALSE, "Supervised machine learning requires a genuine sentiment label column.", error_code = "MISSING_LABEL"))
   }
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Preprocessed dataset required for model training.", error_code = "NOT_PREPROCESSED"))
   }
   
@@ -412,7 +393,6 @@ function(req, res) {
       confusion_matrix = eval_res$Confusion_Matrix_DF
     ))
   }, error = function(e) {
-    res$status <- 500
     api_response(FALSE, paste("KNN training error:", e$message), error_code = "TRAIN_ERROR")
   })
 }
@@ -421,11 +401,9 @@ function(req, res) {
 #* @post /train/all
 function(req, res) {
   if (is.null(state$status$is_labeled) || !state$status$is_labeled) {
-    res$status <- 400
     return(api_response(FALSE, "Supervised machine learning models require genuine sentiment labels.", error_code = "MISSING_LABEL"))
   }
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Preprocessed dataset required for model training.", error_code = "NOT_PREPROCESSED"))
   }
   
@@ -448,7 +426,6 @@ function(req, res) {
       confusion_matrices = state$ml_summary$Confusion_Matrices
     ))
   }, error = function(e) {
-    res$status <- 500
     api_response(FALSE, paste("Error training ML models:", e$message), error_code = "ML_TRAIN_ERROR")
   })
 }
@@ -504,7 +481,6 @@ function(req, res) {
 #* @get /insights
 function(req, res) {
   if (is.null(state$sentiment_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Sentiment analysis must be performed prior to generating insights.", error_code = "NO_SENTIMENT"))
   }
   
@@ -547,7 +523,6 @@ function(req, res) {
 #* @get /download/processed
 function(req, res) {
   if (is.null(state$preprocessed_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Processed dataset not available.", error_code = "NOT_AVAILABLE"))
   }
   
@@ -563,7 +538,6 @@ function(req, res) {
 #* @get /download/sentiment
 function(req, res) {
   if (is.null(state$sentiment_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Sentiment analysis results not available.", error_code = "NOT_AVAILABLE"))
   }
   
@@ -579,7 +553,6 @@ function(req, res) {
 #* @get /download/models
 function(req, res) {
   if (is.null(state$ml_summary)) {
-    res$status <- 400
     return(api_response(FALSE, "Model performance comparison not available.", error_code = "NOT_AVAILABLE"))
   }
   
@@ -595,7 +568,6 @@ function(req, res) {
 #* @get /download/insights
 function(req, res) {
   if (is.null(state$insights)) {
-    res$status <- 400
     return(api_response(FALSE, "Customer insights report not available.", error_code = "NOT_AVAILABLE"))
   }
   
@@ -636,7 +608,6 @@ function(req, res) {
 #* @get /download/complete
 function(req, res) {
   if (is.null(state$sentiment_df)) {
-    res$status <- 400
     return(api_response(FALSE, "Analysis results not available.", error_code = "NOT_AVAILABLE"))
   }
   

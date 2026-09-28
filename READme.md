@@ -176,26 +176,45 @@ cd frontend
 npm install
 ```
 
----
-
 ## 6. How to Run the Application
 
-### Start the R Plumber API Backend (Port 8000)
+### Option A: Using One-Click Batch Launchers (Recommended for Windows)
 
-From the project root:
+* **Start Backend Server:** Double-click `start_backend.bat` or run `backend\run_plumber.bat`
+* **Start Frontend Server:** Double-click `start_frontend.bat`
 
-```bash
+---
+
+### Option B: Running Manually from PowerShell Terminal
+
+#### 1. Start the R Plumber API Backend (Port 8000)
+
+Navigate to the `backend` folder:
+
+```powershell
 cd backend
+```
+
+Since `Rscript.exe` is installed at `C:\Program Files\R\R-4.6.1\bin\Rscript.exe`, execute:
+
+```powershell
+& "C:\Program Files\R\R-4.6.1\bin\Rscript.exe" run_plumber.R
+```
+
+*Or temporarily add R to your PowerShell session PATH first:*
+
+```powershell
+$env:Path += ";C:\Program Files\R\R-4.6.1\bin"
 Rscript run_plumber.R
 ```
 
 The R backend API will start on `http://127.0.0.1:8000` with Swagger docs available at `http://127.0.0.1:8000/__docs__/`.
 
-### Start the React Frontend Application (Port 3000)
+#### 2. Start the React Frontend Application (Port 3000)
 
 In a new terminal window:
 
-```bash
+```powershell
 cd frontend
 npm run dev
 ```
