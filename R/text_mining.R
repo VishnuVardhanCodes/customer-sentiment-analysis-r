@@ -1,6 +1,6 @@
 # ==============================================================================
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
-# Module: Text Mining (R/text_mining.R)
+# Module: Text Mining (backend/R/text_mining.R)
 # ==============================================================================
 
 suppressPackageStartupMessages({
@@ -98,7 +98,7 @@ extract_keywords <- function(tfidf_df, top_n = 20) {
 #'
 #' @param clean_text_vec Character vector of cleaned text
 #' @param min_term_freq Minimum frequency count threshold for terms
-#' @return List containing `dtm` (Matrix) and `vocabulary`
+#' @return List containing `dtm_matrix` and `vocabulary`
 create_dtm_matrix <- function(clean_text_vec, min_term_freq = 2) {
   corpus <- tm::VCorpus(tm::VectorSource(clean_text_vec))
   dtm <- tm::DocumentTermMatrix(corpus, control = list(bounds = list(global = c(min_term_freq, Inf))))

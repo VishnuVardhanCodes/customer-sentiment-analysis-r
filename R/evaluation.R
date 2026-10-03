@@ -1,6 +1,6 @@
 # ==============================================================================
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
-# Module: Model Evaluation & Performance Metrics (R/evaluation.R)
+# Module: Model Evaluation & Performance Metrics (backend/R/evaluation.R)
 # ==============================================================================
 
 suppressPackageStartupMessages({
@@ -16,11 +16,20 @@ evaluate_model_performance <- function(actual_y, pred_y) {
   actual <- as.character(actual_y)
   pred   <- as.character(pred_y)
   
+  # Ensure equal lengths
+  if (length(actual) != length(pred)) {
+    min_len <- min(length(actual), length(pred))
+    if (min_len > 0) {
+      actual <- actual[seq_len(min_len)]
+      pred   <- pred[seq_len(min_len)]
+    }
+  }
+  
   classes <- union(unique(actual), unique(pred))
   n_total <- length(actual)
   
   # Overall Accuracy
-  accuracy <- sum(actual == pred) / n_total
+  accuracy <- if (n_total > 0) sum(actual == pred) / n_total else 0
   
   # Per-class Precision, Recall, and F1-score
   class_metrics <- lapply(classes, function(cls) {

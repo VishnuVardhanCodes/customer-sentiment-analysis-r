@@ -10,9 +10,10 @@ import TfidfChart from '../charts/TfidfChart';
 import WordCloudView from '../charts/WordCloudView';
 import ModelComparisonChart from '../charts/ModelComparisonChart';
 import ConfusionMatrixHeatmap from '../charts/ConfusionMatrixHeatmap';
+import ProductSentimentChart from '../charts/ProductSentimentChart';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
-import { PieChart, ArrowRight, Smile } from 'lucide-react';
+import { PieChart, ArrowRight } from 'lucide-react';
 
 const Visualization = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const Visualization = () => {
     pipelineStatus,
     visualizationResults,
     setVisualizationResults,
+    productSummaries,
+    categorySummaries,
   } = useAnalysis();
 
   useEffect(() => {
@@ -66,32 +69,51 @@ const Visualization = () => {
 
   const viz = visualizationResults || {};
   const isLabeled = pipelineStatus.is_labeled;
+  const prodData = viz.product_summaries || productSummaries || [];
+  const catData = viz.category_summaries || categorySummaries || [];
 
   return (
     <div>
       <PageHeader
         title="Analytics & Visualization Grid"
-        subtitle="Comprehensive visual overview of sentiment distribution, term frequencies, TF-IDF weights, word clouds, and model metrics."
+        subtitle="Comprehensive visual overview of sentiment distribution, term frequencies, TF-IDF weights, word clouds, product breakdowns, and model metrics."
       >
         <button className="btn btn-primary btn-md" onClick={() => navigate('/insights')}>
           Proceed to Customer Insights <ArrowRight size={16} />
         </button>
       </PageHeader>
 
-      {/* 6-CARD RESPONSIVE GRID */}
+      {/* PRODUCT & CATEGORY LEVEL COMPARISON (When Present) */}
+      {(prodData.length > 0 || catData.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          {prodData.length > 0 && (
+            <ChartCard title="Product-Wise Sentiment Comparison" subtitle="Positive, Neutral, and Negative review counts per product">
+              <ProductSentimentChart data={prodData} keyName="product" />
+            </ChartCard>
+          )}
+
+          {catData.length > 0 && (
+            <ChartCard title="Category-Wise Sentiment Comparison" subtitle="Sentiment distribution aggregated by product category">
+              <ProductSentimentChart data={catData} keyName="category" />
+            </ChartCard>
+          )}
+        </div>
+      )}
+
+      {/* CORE 6-CARD RESPONSIVE GRID */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Card 1: Sentiment Distribution */}
-        <ChartCard title="1. Sentiment Distribution" subtitle="Positive, Neutral, and Negative proportions">
+        <ChartCard title="1. Overall Sentiment Distribution" subtitle="Positive, Neutral, and Negative proportions">
           <SentimentDonutChart data={viz.sentiment_distribution || []} />
         </ChartCard>
 
         {/* Card 2: Top Frequent Words */}
-        <ChartCard title="2. Top Frequent Words" subtitle="Highest occurring terms across feedback">
+        <ChartCard title="2. Top Frequent Words" subtitle="Highest occurring terms across customer feedback">
           <WordFreqChart data={viz.word_frequencies || []} limit={15} />
         </ChartCard>
 
         {/* Card 3: TF-IDF Terms */}
-        <ChartCard title="3. Top TF-IDF Terms" subtitle="Statistical term importance scores">
+        <ChartCard title="3. Top TF-IDF Terms" subtitle="Statistical term importance and discriminative weights">
           <TfidfChart data={viz.tfidf_terms || []} limit={15} />
         </ChartCard>
 
@@ -131,3 +153,4 @@ const Visualization = () => {
 };
 
 export default Visualization;
+

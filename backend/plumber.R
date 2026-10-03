@@ -32,6 +32,9 @@ reset_state_env <- function() {
   state$raw_df <- NULL
   state$text_col <- NULL
   state$label_col <- NULL
+  state$product_col <- NULL
+  state$category_col <- NULL
+  state$rating_col <- NULL
   state$filename <- NULL
   state$file_size <- 0
   state$validation <- NULL
@@ -41,9 +44,13 @@ reset_state_env <- function() {
   state$sentiment_df <- NULL
   state$sentiment_kpis <- NULL
   state$sentiment_words <- NULL
+  state$product_summaries <- NULL
+  state$category_summaries <- NULL
   state$ml_data <- NULL
   state$ml_preds <- list()
   state$ml_summary <- NULL
+  state$trained_models <- list()
+  state$last_single_analysis <- NULL
   state$insights <- NULL
   state$status <- list(
     uploaded = FALSE,
@@ -136,11 +143,14 @@ function(req, res) {
     
     state$text_col <- detect_text_column(df)
     state$label_col <- detect_label_column(df)
+    state$product_col <- detect_product_column(df)
+    state$category_col <- detect_category_column(df)
+    state$rating_col <- detect_rating_column(df)
     
     state$status$uploaded <- TRUE
     state$status$is_labeled <- !is.null(state$label_col)
     
-    state$validation <- validate_dataset(df, state$text_col, state$label_col)
+    state$validation <- validate_dataset(df, state$text_col, state$label_col, state$product_col, state$category_col, state$rating_col)
     state$status$validated <- TRUE
     
     api_response(TRUE, "Dataset uploaded and parsed successfully.", list(
@@ -151,6 +161,9 @@ function(req, res) {
       column_names = colnames(df),
       text_column = state$text_col,
       label_column = state$label_col,
+      product_column = state$product_col,
+      category_column = state$category_col,
+      rating_column = state$rating_col,
       is_labeled = state$status$is_labeled,
       preview = head(df, 15)
     ))
@@ -177,8 +190,29 @@ function(req, res) {
       state$label_col <- NULL
     }
   }
+  if (!is.null(body$product_column)) {
+    if (body$product_column %in% colnames(state$raw_df)) {
+      state$product_col <- body$product_column
+    } else if (body$product_column == "" || body$product_column == "none") {
+      state$product_col <- NULL
+    }
+  }
+  if (!is.null(body$category_column)) {
+    if (body$category_column %in% colnames(state$raw_df)) {
+      state$category_col <- body$category_column
+    } else if (body$category_column == "" || body$category_column == "none") {
+      state$category_col <- NULL
+    }
+  }
+  if (!is.null(body$rating_column)) {
+    if (body$rating_column %in% colnames(state$raw_df)) {
+      state$rating_col <- body$rating_column
+    } else if (body$rating_column == "" || body$rating_column == "none") {
+      state$rating_col <- NULL
+    }
+  }
   
-  state$validation <- validate_dataset(state$raw_df, state$text_col, state$label_col)
+  state$validation <- validate_dataset(state$raw_df, state$text_col, state$label_col, state$product_col, state$category_col, state$rating_col)
   state$status$validated <- TRUE
   state$status$is_labeled <- !is.null(state$label_col)
   
@@ -272,6 +306,14 @@ function(req, res) {
   state$sentiment_kpis  <- calculate_sentiment_kpis(state$sentiment_df)
   state$sentiment_words <- get_sentiment_word_counts(state$sentiment_df$cleaned_text, top_n = 20)
   
+  # Product-wise and Category-wise aggregation
+  if (!is.null(state$product_col) && state$product_col %in% colnames(state$sentiment_df)) {
+    state$product_summaries <- calculate_product_summaries(state$sentiment_df, state$product_col, state$rating_col)
+  }
+  if (!is.null(state$category_col) && state$category_col %in% colnames(state$sentiment_df)) {
+    state$category_summaries <- calculate_category_summaries(state$sentiment_df, state$category_col)
+  }
+  
   state$status$sentiment_analyzed <- TRUE
   
   review_results <- state$sentiment_df %>%
@@ -282,6 +324,8 @@ function(req, res) {
     kpis = state$sentiment_kpis,
     sentiment_words = state$sentiment_words,
     reviews = head(review_results, 100),
+    product_summaries = state$product_summaries,
+    category_summaries = state$category_summaries,
     is_labeled = state$status$is_labeled
   ))
 }
@@ -302,10 +346,16 @@ function(req, res) {
       state$ml_data <- prepare_ml_datasets(state$preprocessed_df$cleaned_text, labels = labels)
     }
     
-    nb_preds <- run_naive_bayes(state$ml_data$train_x, state$ml_data$train_y, state$ml_data$test_x)
-    state$ml_preds[["Naive Bayes"]] <- nb_preds
+    nb_res <- run_naive_bayes(state$ml_data$train_x, state$ml_data$train_y, state$ml_data$test_x)
+    state$ml_preds[["Naive Bayes"]] <- nb_res$predictions
     
-    eval_res <- evaluate_model_performance(state$ml_data$test_y, nb_preds)
+    # Store fitted model for single review prediction
+    state$trained_models$nb <- nb_res$model
+    state$trained_models$nb_valid_cols <- nb_res$valid_cols
+    state$trained_models$vocabulary <- state$ml_data$vocabulary
+    state$trained_models$classes <- levels(state$ml_data$train_y)
+    
+    eval_res <- evaluate_model_performance(state$ml_data$test_y, nb_res$predictions)
     
     api_response(TRUE, "Naive Bayes classifier trained successfully.", list(
       model = "Naive Bayes",
@@ -338,10 +388,16 @@ function(req, res) {
       state$ml_data <- prepare_ml_datasets(state$preprocessed_df$cleaned_text, labels = labels)
     }
     
-    svm_preds <- run_svm(state$ml_data$train_x, state$ml_data$train_y, state$ml_data$test_x)
-    state$ml_preds[["SVM"]] <- svm_preds
+    svm_res <- run_svm(state$ml_data$train_x, state$ml_data$train_y, state$ml_data$test_x)
+    state$ml_preds[["SVM"]] <- svm_res$predictions
     
-    eval_res <- evaluate_model_performance(state$ml_data$test_y, svm_preds)
+    # Store fitted model for single review prediction
+    state$trained_models$svm <- svm_res$model
+    state$trained_models$svm_valid_cols <- svm_res$valid_cols
+    state$trained_models$vocabulary <- state$ml_data$vocabulary
+    state$trained_models$classes <- levels(state$ml_data$train_y)
+    
+    eval_res <- evaluate_model_performance(state$ml_data$test_y, svm_res$predictions)
     
     api_response(TRUE, "Support Vector Machine (SVM) trained successfully.", list(
       model = "SVM",
@@ -377,10 +433,17 @@ function(req, res) {
       state$ml_data <- prepare_ml_datasets(state$preprocessed_df$cleaned_text, labels = labels)
     }
     
-    knn_preds <- run_knn(state$ml_data$train_x, state$ml_data$train_y, state$ml_data$test_x, k = k)
-    state$ml_preds[["KNN"]] <- knn_preds
+    knn_res <- run_knn(state$ml_data$train_x, state$ml_data$train_y, state$ml_data$test_x, k = k)
+    state$ml_preds[["KNN"]] <- knn_res$predictions
     
-    eval_res <- evaluate_model_performance(state$ml_data$test_y, knn_preds)
+    # Store fitted model data for single review prediction
+    state$trained_models$knn_train_x <- knn_res$train_x
+    state$trained_models$knn_train_y <- knn_res$train_y
+    state$trained_models$knn_k <- knn_res$k
+    state$trained_models$vocabulary <- state$ml_data$vocabulary
+    state$trained_models$classes <- levels(state$ml_data$train_y)
+    
+    eval_res <- evaluate_model_performance(state$ml_data$test_y, knn_res$predictions)
     
     api_response(TRUE, "K-Nearest Neighbors (KNN) trained successfully.", list(
       model = "KNN",
@@ -413,8 +476,16 @@ function(req, res) {
     
     ml_eval <- execute_all_ml_models(state$ml_data)
     state$ml_preds <- ml_eval$predictions
+    state$trained_models <- ml_eval$models
     
     state$ml_summary <- compare_all_models(ml_eval)
+    state$trained_models$train_stats <- list(
+      classes = levels(state$ml_data$train_y),
+      best_model = state$ml_summary$Best_Model,
+      best_acc = state$ml_summary$Best_Accuracy,
+      best_f1 = state$ml_summary$Best_F1
+    )
+    
     state$status$ml_trained <- TRUE
     state$status$evaluated  <- TRUE
     
@@ -461,6 +532,13 @@ function(req, res) {
     viz_data$sentiment_distribution <- state$sentiment_df %>%
       count(Sentiment) %>%
       mutate(Percentage = round((n / sum(n)) * 100, 1))
+      
+    if (!is.null(state$rating_col) && state$rating_col %in% colnames(state$sentiment_df)) {
+      viz_data$rating_distribution <- state$sentiment_df %>%
+        filter(!is.na(.data[[state$rating_col]])) %>%
+        count(Rating = as.character(.data[[state$rating_col]])) %>%
+        mutate(Percentage = round((n / sum(n)) * 100, 1))
+    }
   }
   
   if (!is.null(state$text_mining)) {
@@ -472,6 +550,14 @@ function(req, res) {
   if (!is.null(state$ml_summary)) {
     viz_data$model_comparison    <- state$ml_summary$Comparison_Table
     viz_data$confusion_matrices  <- state$ml_summary$Confusion_Matrices
+  }
+  
+  if (!is.null(state$product_summaries)) {
+    viz_data$product_summaries <- head(state$product_summaries, 15)
+  }
+  
+  if (!is.null(state$category_summaries)) {
+    viz_data$category_summaries <- state$category_summaries
   }
   
   api_response(TRUE, "Visualization data generated.", viz_data)
@@ -488,6 +574,103 @@ function(req, res) {
   state$status$insights_generated <- TRUE
   
   api_response(TRUE, "Customer insights generated successfully.", state$insights)
+}
+
+#* Analyze an individual customer review
+#* @post /analyze-review
+function(req, res) {
+  tryCatch({
+    body <- tryCatch(jsonlite::fromJSON(req$postBody), error = function(e) list())
+    
+    review_text <- if (!is.null(body$review_text)) as.character(body$review_text) else ""
+    product_name <- if (!is.null(body$product_name) && nchar(trimws(body$product_name)) > 0) as.character(body$product_name) else "Product"
+    cat_val <- if (!is.null(body$product_category)) body$product_category else if (!is.null(body$category)) body$category else "General"
+    product_category <- if (nchar(trimws(cat_val)) > 0) as.character(cat_val) else "General"
+    original_rating <- if (!is.null(body$original_rating) && body$original_rating != "") suppressWarnings(as.numeric(body$original_rating)) else NULL
+    model_choice <- if (!is.null(body$model_choice)) as.character(body$model_choice) else "Auto"
+    
+    if (nchar(trimws(review_text)) == 0) {
+      return(api_response(FALSE, "Please enter a customer review to analyze.", error_code = "EMPTY_REVIEW"))
+    }
+    
+    analysis <- analyze_single_review(
+      review_text = review_text,
+      product_name = product_name,
+      product_category = product_category,
+      original_rating = original_rating,
+      model_choice = model_choice,
+      trained_models = state$trained_models
+    )
+    
+    state$last_single_analysis <- analysis
+    
+    api_response(TRUE, "Review analyzed successfully.", analysis)
+  }, error = function(e) {
+    api_response(FALSE, paste("Review analysis error:", e$message), error_code = "ANALYSIS_ERROR")
+  })
+}
+
+#* Analyze multiple customer reviews for the same product (Compare Reviews)
+#* @post /analyze-reviews
+function(req, res) {
+  tryCatch({
+    body <- tryCatch(jsonlite::fromJSON(req$postBody), error = function(e) list())
+    
+    reviews_list <- body$reviews
+    product_name <- if (!is.null(body$product_name) && nchar(trimws(body$product_name)) > 0) as.character(body$product_name) else "Product"
+    cat_val <- if (!is.null(body$product_category)) body$product_category else if (!is.null(body$category)) body$category else "General"
+    product_category <- if (nchar(trimws(cat_val)) > 0) as.character(cat_val) else "General"
+    model_choice <- if (!is.null(body$model_choice)) as.character(body$model_choice) else "Auto"
+
+    
+    if (is.null(reviews_list) || length(reviews_list) == 0) {
+      return(api_response(FALSE, "No reviews provided for comparison.", error_code = "NO_REVIEWS"))
+    }
+    
+    multi_res <- analyze_multiple_reviews(
+      reviews_list = reviews_list,
+      product_name = product_name,
+      product_category = product_category,
+      model_choice = model_choice,
+      trained_models = state$trained_models
+    )
+    
+    api_response(TRUE, "Multi-review analysis completed successfully.", multi_res)
+  }, error = function(e) {
+    api_response(FALSE, paste("Multi-review analysis error:", e$message), error_code = "MULTI_ERROR")
+  })
+}
+
+#* Get ML model status and available trained algorithms
+#* @get /model-info
+function(req, res) {
+  is_trained <- !is.null(state$status$ml_trained) && state$status$ml_trained && !is.null(state$trained_models$vocabulary)
+  avail_models <- c("Bing Lexicon (Syuzhet)")
+  if (!is.null(state$trained_models$svm)) avail_models <- c(avail_models, "Support Vector Machine (SVM)")
+  if (!is.null(state$trained_models$nb)) avail_models <- c(avail_models, "Naive Bayes")
+  if (!is.null(state$trained_models$knn_train_x)) avail_models <- c(avail_models, "K-Nearest Neighbors (KNN)")
+  
+  api_response(TRUE, "Model status retrieved.", list(
+    is_trained = is_trained,
+    available_models = avail_models,
+    vocabulary_size = if (!is.null(state$trained_models$vocabulary)) length(state$trained_models$vocabulary) else 0,
+    classes = if (!is.null(state$trained_models$classes)) state$trained_models$classes else c("Positive", "Neutral", "Negative"),
+    best_model = if (!is.null(state$ml_summary)) state$ml_summary$Best_Model else NULL,
+    best_accuracy = if (!is.null(state$ml_summary)) state$ml_summary$Best_Accuracy else NULL,
+    best_f1 = if (!is.null(state$ml_summary)) state$ml_summary$Best_F1 else NULL,
+    comparison_table = if (!is.null(state$ml_summary)) state$ml_summary$Comparison_Table else NULL
+  ))
+}
+
+#* Get product-level and category-level summaries
+#* @get /product-summary
+function(req, res) {
+  api_response(TRUE, "Product summary retrieved.", list(
+    has_products = !is.null(state$product_summaries) && nrow(state$product_summaries) > 0,
+    has_categories = !is.null(state$category_summaries) && nrow(state$category_summaries) > 0,
+    products = state$product_summaries,
+    categories = state$category_summaries
+  ))
 }
 
 #* Get Overall Analysis Results & Pipeline Status
@@ -508,12 +691,16 @@ function(req, res) {
     best_accuracy = best_model_acc,
     unique_terms = unique_terms,
     avg_sentiment = avg_sentiment,
+    products_analyzed = if (!is.null(state$product_summaries)) nrow(state$product_summaries) else 0,
+    categories_count = if (!is.null(state$category_summaries)) nrow(state$category_summaries) else 0,
     kpis = state$sentiment_kpis,
     available_downloads = list(
       processed = !is.null(state$preprocessed_df),
       sentiment = !is.null(state$sentiment_df),
       models    = !is.null(state$ml_summary),
       insights  = !is.null(state$insights),
+      products  = !is.null(state$product_summaries),
+      review    = !is.null(state$last_single_analysis),
       complete  = !is.null(state$sentiment_df)
     )
   ))
@@ -549,6 +736,36 @@ function(req, res) {
   include_file(file_path, res, "text/csv")
 }
 
+#* Download product-level summaries CSV
+#* @get /download/product-summary
+function(req, res) {
+  if (is.null(state$product_summaries)) {
+    return(api_response(FALSE, "Product summaries not available.", error_code = "NOT_AVAILABLE"))
+  }
+  
+  file_path <- file.path("outputs", "product_level_summary.csv")
+  readr::write_csv(state$product_summaries, file_path)
+  
+  res$setHeader("Content-Type", "text/csv")
+  res$setHeader("Content-Disposition", 'attachment; filename="product_level_summary.csv"')
+  include_file(file_path, res, "text/csv")
+}
+
+#* Download individual review analysis JSON
+#* @get /download/review-analysis
+function(req, res) {
+  if (is.null(state$last_single_analysis)) {
+    return(api_response(FALSE, "No review analysis available to download.", error_code = "NOT_AVAILABLE"))
+  }
+  
+  file_path <- file.path("outputs", "single_review_analysis.json")
+  writeLines(jsonlite::toJSON(state$last_single_analysis, auto_unbox = TRUE, pretty = TRUE), file_path)
+  
+  res$setHeader("Content-Type", "application/json")
+  res$setHeader("Content-Disposition", 'attachment; filename="single_review_analysis.json"')
+  include_file(file_path, res, "application/json")
+}
+
 #* Download model performance CSV
 #* @get /download/models
 function(req, res) {
@@ -574,7 +791,7 @@ function(req, res) {
   ins <- state$insights
   report_lines <- c(
     "=================================================================",
-    "LG9 - CUSTOMER SENTIMENT ANALYSIS EXECUTIVE REPORT",
+    "CUSTOMER SENTIMENT ANALYSIS - PRODUCT & FEEDBACK REPORT",
     "=================================================================",
     paste("Generated On:", Sys.time()),
     paste("Dataset File:", ifelse(is.null(state$filename), "Unknown", state$filename)),
@@ -588,7 +805,7 @@ function(req, res) {
     "--- NEGATIVE THEMES & COMPLAINTS ---",
     paste("-", ins$Negative_Themes),
     "",
-    "--- STRATEGIC RECOMMENDATIONS ---",
+    "--- STRATEGIC RECOMMENDATIONS FOR BUYERS & BUSINESSES ---",
     paste("1.", ins$Recommendations),
     ""
   )
@@ -639,21 +856,24 @@ function(req, res) {
   state$raw_df <- df
   state$filename <- "sample_reviews.csv"
   state$file_size <- file.info(sample_path)$size
-  state$text_col <- "review_text"
-  state$label_col <- "sentiment"
+  state$text_col <- detect_text_column(df)
+  state$label_col <- detect_label_column(df)
+  state$product_col <- detect_product_column(df)
+  state$category_col <- detect_category_column(df)
+  state$rating_col <- detect_rating_column(df)
   
   state$status$uploaded <- TRUE
   state$status$is_labeled <- TRUE
   state$status$is_demo <- TRUE
   
   # Step 1: Validate
-  state$validation <- validate_dataset(df, state$text_col, state$label_col)
+  state$validation <- validate_dataset(df, state$text_col, state$label_col, state$product_col, state$category_col, state$rating_col)
   state$status$validated <- TRUE
   
   # Step 2: Preprocess
   state$preprocessed_df <- preprocess_dataset(df, state$text_col, remove_stopwords = TRUE, perform_stemming = TRUE)
   clean_vec <- state$preprocessed_df$cleaned_text
-  words_before <- sum(sapply(strsplit(as.character(df$review_text), "\\s+"), length))
+  words_before <- sum(sapply(strsplit(as.character(df[[state$text_col]]), "\\s+"), length))
   words_after <- sum(sapply(strsplit(clean_vec, "\\s+"), length))
   state$preprocessing_stats <- list(
     records_processed = length(clean_vec),
@@ -683,6 +903,14 @@ function(req, res) {
   state$sentiment_df    <- analyze_lexicon_sentiment(state$preprocessed_df, text_col = state$text_col)
   state$sentiment_kpis  <- calculate_sentiment_kpis(state$sentiment_df)
   state$sentiment_words <- get_sentiment_word_counts(state$sentiment_df$cleaned_text, top_n = 20)
+  
+  if (!is.null(state$product_col) && state$product_col %in% colnames(state$sentiment_df)) {
+    state$product_summaries <- calculate_product_summaries(state$sentiment_df, state$product_col, state$rating_col)
+  }
+  if (!is.null(state$category_col) && state$category_col %in% colnames(state$sentiment_df)) {
+    state$category_summaries <- calculate_category_summaries(state$sentiment_df, state$category_col)
+  }
+  
   state$status$sentiment_analyzed <- TRUE
   
   # Step 5: Supervised ML (NB, SVM, KNN)
@@ -690,7 +918,14 @@ function(req, res) {
   state$ml_data <- prepare_ml_datasets(state$preprocessed_df$cleaned_text, labels = labels)
   ml_eval <- execute_all_ml_models(state$ml_data)
   state$ml_preds <- ml_eval$predictions
+  state$trained_models <- ml_eval$models
   state$ml_summary <- compare_all_models(ml_eval)
+  state$trained_models$train_stats <- list(
+    classes = levels(state$ml_data$train_y),
+    best_model = state$ml_summary$Best_Model,
+    best_acc = state$ml_summary$Best_Accuracy,
+    best_f1 = state$ml_summary$Best_F1
+  )
   state$status$ml_trained <- TRUE
   state$status$evaluated  <- TRUE
   
@@ -703,7 +938,12 @@ function(req, res) {
     validation = state$validation,
     stats = state$preprocessing_stats,
     text_mining = state$text_mining,
-    sentiment = list(kpis = state$sentiment_kpis, sentiment_words = state$sentiment_words),
+    sentiment = list(
+      kpis = state$sentiment_kpis, 
+      sentiment_words = state$sentiment_words,
+      product_summaries = state$product_summaries,
+      category_summaries = state$category_summaries
+    ),
     ml_evaluation = list(
       comparison_table = state$ml_summary$Comparison_Table,
       best_model = state$ml_summary$Best_Model,
@@ -728,21 +968,24 @@ function(req, res) {
   state$raw_df <- df
   state$filename <- "sample_unlabeled.csv"
   state$file_size <- file.info(sample_path)$size
-  state$text_col <- "review_text"
+  state$text_col <- detect_text_column(df)
   state$label_col <- NULL
+  state$product_col <- detect_product_column(df)
+  state$category_col <- detect_category_column(df)
+  state$rating_col <- detect_rating_column(df)
   
   state$status$uploaded <- TRUE
   state$status$is_labeled <- FALSE
   state$status$is_demo <- TRUE
   
   # Step 1: Validate
-  state$validation <- validate_dataset(df, state$text_col, state$label_col)
+  state$validation <- validate_dataset(df, state$text_col, state$label_col, state$product_col, state$category_col, state$rating_col)
   state$status$validated <- TRUE
   
   # Step 2: Preprocess
   state$preprocessed_df <- preprocess_dataset(df, state$text_col, remove_stopwords = TRUE, perform_stemming = TRUE)
   clean_vec <- state$preprocessed_df$cleaned_text
-  words_before <- sum(sapply(strsplit(as.character(df$review_text), "\\s+"), length))
+  words_before <- sum(sapply(strsplit(as.character(df[[state$text_col]]), "\\s+"), length))
   words_after <- sum(sapply(strsplit(clean_vec, "\\s+"), length))
   state$preprocessing_stats <- list(
     records_processed = length(clean_vec),
@@ -772,6 +1015,14 @@ function(req, res) {
   state$sentiment_df    <- analyze_lexicon_sentiment(state$preprocessed_df, text_col = state$text_col)
   state$sentiment_kpis  <- calculate_sentiment_kpis(state$sentiment_df)
   state$sentiment_words <- get_sentiment_word_counts(state$sentiment_df$cleaned_text, top_n = 20)
+  
+  if (!is.null(state$product_col) && state$product_col %in% colnames(state$sentiment_df)) {
+    state$product_summaries <- calculate_product_summaries(state$sentiment_df, state$product_col, state$rating_col)
+  }
+  if (!is.null(state$category_col) && state$category_col %in% colnames(state$sentiment_df)) {
+    state$category_summaries <- calculate_category_summaries(state$sentiment_df, state$category_col)
+  }
+  
   state$status$sentiment_analyzed <- TRUE
   
   # ML unavailable for unlabeled dataset
@@ -786,7 +1037,12 @@ function(req, res) {
     validation = state$validation,
     stats = state$preprocessing_stats,
     text_mining = state$text_mining,
-    sentiment = list(kpis = state$sentiment_kpis, sentiment_words = state$sentiment_words),
+    sentiment = list(
+      kpis = state$sentiment_kpis, 
+      sentiment_words = state$sentiment_words,
+      product_summaries = state$product_summaries,
+      category_summaries = state$category_summaries
+    ),
     ml_message = "SUPERVISED ML UNAVAILABLE - Supervised machine-learning models require genuine sentiment labels.",
     insights = state$insights
   ))

@@ -22,6 +22,12 @@ const UploadData = () => {
     setTextColumn,
     labelColumn,
     setLabelColumn,
+    productColumn,
+    setProductColumn,
+    categoryColumn,
+    setCategoryColumn,
+    ratingColumn,
+    setRatingColumn,
     setValidationResults,
     setPipelineStatus,
     resetAll,
@@ -43,13 +49,16 @@ const UploadData = () => {
         });
         setTextColumn(d.text_column || '');
         setLabelColumn(d.label_column || '');
-        
+        if (d.product_col) setProductColumn(d.product_col);
+        if (d.category_col) setCategoryColumn(d.category_col);
+        if (d.rating_col) setRatingColumn(d.rating_col);
+
         setPipelineStatus((prev) => ({
           ...prev,
           uploaded: true,
           is_labeled: d.is_labeled,
         }));
-        
+
         addToast(`Dataset '${filename}' uploaded successfully!`, 'success');
       }
     } catch (err) {
@@ -66,9 +75,9 @@ const UploadData = () => {
     }
 
     setLoading(true);
-    setLoadingText('Validating dataset quality and column selections...');
+    setLoadingText('Validating dataset quality and column selections in R...');
     try {
-      const res = await api.validateDataset(textColumn, labelColumn);
+      const res = await api.validateDataset(textColumn, labelColumn, productColumn, categoryColumn, ratingColumn);
       if (res.success) {
         setValidationResults(res.data);
         setPipelineStatus((prev) => ({
@@ -93,8 +102,8 @@ const UploadData = () => {
   return (
     <div>
       <PageHeader
-        title="Upload Customer Feedback"
-        subtitle="Import CSV or TXT files containing customer reviews, comments or social-media feedback."
+        title="Upload Customer Feedback Dataset"
+        subtitle="Import CSV or TXT datasets containing customer reviews, product attributes, and ratings."
       />
 
       {!datasetMetadata ? (
@@ -106,6 +115,12 @@ const UploadData = () => {
           setTextColumn={setTextColumn}
           labelColumn={labelColumn}
           setLabelColumn={setLabelColumn}
+          productColumn={productColumn}
+          setProductColumn={setProductColumn}
+          categoryColumn={categoryColumn}
+          setCategoryColumn={setCategoryColumn}
+          ratingColumn={ratingColumn}
+          setRatingColumn={setRatingColumn}
           onValidate={handleValidate}
           onReplace={() => setDatasetMetadata(null)}
           onRemove={resetAll}
@@ -117,3 +132,4 @@ const UploadData = () => {
 };
 
 export default UploadData;
+

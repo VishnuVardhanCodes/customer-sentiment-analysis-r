@@ -1,6 +1,6 @@
 # ==============================================================================
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
-# Module: Dynamic Visualizations (R/visualization.R)
+# Module: Dynamic Visualizations (backend/R/visualization.R)
 # ==============================================================================
 
 suppressPackageStartupMessages({
@@ -31,7 +31,6 @@ plot_sentiment_distribution <- function(sentiment_df) {
     count(Sentiment) %>%
     mutate(Percentage = round((n / sum(n)) * 100, 1))
   
-  # Ensure order Positive, Neutral, Negative
   counts$Sentiment <- factor(counts$Sentiment, levels = c("Positive", "Neutral", "Negative"))
   
   p <- ggplot(counts, aes(x = Sentiment, y = n, fill = Sentiment)) +

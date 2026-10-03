@@ -1,6 +1,6 @@
 # ==============================================================================
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
-# Module: Text Preprocessing Pipeline (R/preprocessing.R)
+# Module: Text Preprocessing Pipeline (backend/R/preprocessing.R)
 # ==============================================================================
 
 suppressPackageStartupMessages({
@@ -11,6 +11,12 @@ suppressPackageStartupMessages({
   library(SnowballC)
 })
 
+#' Clean a character vector of customer review/feedback text
+#'
+#' @param text_vector Character vector of raw text
+#' @param remove_stopwords Logical, whether to filter standard English stop words
+#' @param perform_stemming Logical, whether to apply Porter stemming
+#' @return Character vector of cleaned and preprocessed text
 #' Clean a character vector of customer review/feedback text
 #'
 #' @param text_vector Character vector of raw text
@@ -53,6 +59,11 @@ clean_text <- function(text_vector, remove_stopwords = TRUE, perform_stemming = 
   text_vec <- str_replace_all(text_vec, "\\s+", " ")
   text_vec <- str_trim(text_vec)
   
+  # Stop words list: preserve negation terms to prevent inverting sentiment (e.g. 'not good')
+  negation_words <- c("not", "no", "never", "neither", "nor", "hardly", "barely", "scarcely", "without", "against")
+  standard_stopwords <- tm::stopwords("english")
+  effective_stopwords <- setdiff(standard_stopwords, negation_words)
+  
   # Process word-by-word for stop words and stemming
   cleaned_list <- lapply(text_vec, function(doc) {
     if (nchar(doc) == 0) return("")
@@ -61,13 +72,12 @@ clean_text <- function(text_vector, remove_stopwords = TRUE, perform_stemming = 
     words <- unlist(strsplit(doc, "\\s+"))
     words <- words[nchar(words) > 1] # filter single-letter artifacts
     
-    # 10. Remove Stop Words
+    # 10. Remove Stop Words (preserving negations)
     if (remove_stopwords && length(words) > 0) {
-      stop_words_list <- tm::stopwords("english")
-      words <- words[!(words %in% stop_words_list)]
+      words <- words[!(words %in% effective_stopwords)]
     }
     
-    # 12. Apply Stemming
+    # 11. Apply Stemming
     if (perform_stemming && length(words) > 0) {
       words <- SnowballC::wordStem(words, language = "english")
     }
@@ -76,6 +86,41 @@ clean_text <- function(text_vector, remove_stopwords = TRUE, perform_stemming = 
   })
   
   return(as.character(unlist(cleaned_list)))
+}
+
+#' Preprocess a single review and return detailed transformation metrics
+#'
+#' @param text Character string of review
+#' @param remove_stopwords Logical
+#' @param perform_stemming Logical
+#' @return List with original, cleaned text, tokens, and word count changes
+get_preprocessing_details <- function(text, remove_stopwords = TRUE, perform_stemming = TRUE) {
+  if (is.null(text) || is.na(text) || nchar(trimws(text)) == 0) {
+    return(list(
+      original_text = "",
+      cleaned_text = "",
+      words_before = 0,
+      words_after = 0,
+      stopwords_removed = 0,
+      tokens = character(0)
+    ))
+  }
+  
+  raw_words <- unlist(strsplit(trimws(as.character(text)), "\\s+"))
+  words_before <- length(raw_words)
+  
+  cleaned <- clean_text(text, remove_stopwords = remove_stopwords, perform_stemming = perform_stemming)
+  clean_words <- if (nchar(cleaned) > 0) unlist(strsplit(cleaned, "\\s+")) else character(0)
+  words_after <- length(clean_words)
+  
+  return(list(
+    original_text = as.character(text),
+    cleaned_text = cleaned,
+    words_before = words_before,
+    words_after = words_after,
+    stopwords_removed = max(0, words_before - words_after),
+    tokens = clean_words
+  ))
 }
 
 #' Preprocess a full dataset by adding a cleaned_text column

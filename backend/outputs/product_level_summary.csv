@@ -1,0 +1,9 @@
+Product,Total_Reviews,Pos_Count,Neu_Count,Neg_Count,Pos_Pct,Neu_Pct,Neg_Pct,Avg_Rating,Dominant_Sentiment
+Anker 737 Power Bank 24000mAh,13,6,4,3,46.2,30.8,23.1,3.15,Positive
+Apple MacBook Air M2 13-inch,13,5,6,2,38.5,46.2,15.4,3,Neutral
+Samsung Galaxy S24 Ultra,13,7,5,1,53.8,38.5,7.7,3.23,Positive
+Sony WH-1000XM5 Wireless Headphones,13,7,4,2,53.8,30.8,15.4,2.92,Positive
+CeraVe Hydrating Facial Cleanser,12,7,2,3,58.3,16.7,25,3,Positive
+Instant Pot Duo 7-in-1 Pressure Cooker,12,3,6,3,25,50,25,3.08,Neutral
+Logitech MX Master 3S Mouse,12,6,4,2,50,33.3,16.7,3.25,Positive
+Nike Air Zoom Pegasus 40,12,6,4,2,50,33.3,16.7,2.92,Positive

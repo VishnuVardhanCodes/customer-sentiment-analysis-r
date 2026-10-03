@@ -14,6 +14,9 @@ export const AnalysisProvider = ({ children }) => {
   const [datasetMetadata, setDatasetMetadata] = useState(null);
   const [textColumn, setTextColumn] = useState('');
   const [labelColumn, setLabelColumn] = useState('');
+  const [productColumn, setProductColumn] = useState('');
+  const [categoryColumn, setCategoryColumn] = useState('');
+  const [ratingColumn, setRatingColumn] = useState('');
   
   // Pipeline Step Results
   const [validationResults, setValidationResults] = useState(null);
@@ -24,6 +27,12 @@ export const AnalysisProvider = ({ children }) => {
   const [evaluationResults, setEvaluationResults] = useState(null);
   const [visualizationResults, setVisualizationResults] = useState(null);
   const [insightsResults, setInsightsResults] = useState(null);
+  const [productSummaries, setProductSummaries] = useState(null);
+  const [modelInfo, setModelInfo] = useState(null);
+
+  // Workflow A & Comparison States
+  const [singleReviewAnalysis, setSingleReviewAnalysis] = useState(null);
+  const [multiReviewAnalysis, setMultiReviewAnalysis] = useState(null);
   
   // Status Flags
   const [pipelineStatus, setPipelineStatus] = useState({
@@ -79,6 +88,18 @@ export const AnalysisProvider = ({ children }) => {
     if (data.sentiment) setSentimentResults(data.sentiment);
     if (data.ml_evaluation) setEvaluationResults(data.ml_evaluation);
     if (data.insights) setInsightsResults(data.insights);
+    if (data.sentiment?.product_summaries) setProductSummaries(data.sentiment.product_summaries);
+  };
+
+  const fetchModelInfo = async () => {
+    try {
+      const res = await api.getModelInfo();
+      if (res.success) {
+        setModelInfo(res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching model info:', err);
+    }
   };
 
   const resetAll = async () => {
@@ -89,6 +110,9 @@ export const AnalysisProvider = ({ children }) => {
       setDatasetMetadata(null);
       setTextColumn('');
       setLabelColumn('');
+      setProductColumn('');
+      setCategoryColumn('');
+      setRatingColumn('');
       setValidationResults(null);
       setPreprocessingResults(null);
       setTextMiningResults(null);
@@ -97,6 +121,10 @@ export const AnalysisProvider = ({ children }) => {
       setEvaluationResults(null);
       setVisualizationResults(null);
       setInsightsResults(null);
+      setProductSummaries(null);
+      setModelInfo(null);
+      setSingleReviewAnalysis(null);
+      setMultiReviewAnalysis(null);
       setPipelineStatus({
         uploaded: false,
         validated: false,
@@ -135,6 +163,12 @@ export const AnalysisProvider = ({ children }) => {
         setTextColumn,
         labelColumn,
         setLabelColumn,
+        productColumn,
+        setProductColumn,
+        categoryColumn,
+        setCategoryColumn,
+        ratingColumn,
+        setRatingColumn,
         validationResults,
         setValidationResults,
         preprocessingResults,
@@ -143,6 +177,15 @@ export const AnalysisProvider = ({ children }) => {
         setTextMiningResults,
         sentimentResults,
         setSentimentResults,
+        productSummaries,
+        setProductSummaries,
+        modelInfo,
+        setModelInfo,
+        fetchModelInfo,
+        singleReviewAnalysis,
+        setSingleReviewAnalysis,
+        multiReviewAnalysis,
+        setMultiReviewAnalysis,
         modelResults,
         setModelResults,
         evaluationResults,

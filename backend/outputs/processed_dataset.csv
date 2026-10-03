@@ -1,0 +1,51 @@
+Post_ID,Text,Likes,Shares,Comments,Followers,Engagement_Score,Sentiment_Score,Sentiment,cleaned_text
+1001,"Amazing product, I love it and the quality is excellent",147,59,31,5890,0.733,0.88,Positive,amaz product love qualiti excel
+1002,"Great service and very fast delivery, highly recommended",65,46,21,4926,0.456,0.79,Positive,great servic fast deliveri high recommend
+1003,The product works perfectly and I am very happy,161,43,42,8822,0.731,0.63,Positive,product work perfect happi
+1004,Excellent quality and wonderful customer support,46,31,32,7449,0.391,0.62,Positive,excel qualiti wonder custom support
+1005,"Really happy with my purchase, great experience",65,40,14,3885,0.395,0.81,Positive,realli happi purchas great experi
+1006,Fantastic product with good value for money,133,56,29,9774,0.681,0.76,Positive,fantast product good valu money
+1007,"Loved the new features, very useful and easy to use",59,69,5,4056,0.488,0.84,Positive,love new featur use easi use
+1008,"Quick delivery and excellent packaging, thank you",65,16,41,5893,0.395,0.96,Positive,quick deliveri excel packag thank
+1009,Very satisfied with the product and service,104,21,11,8013,0.367,0.66,Positive,satisfi product servic
+1010,The quality is impressive and the product is reliable,128,35,9,1275,0.477,0.63,Positive,qualiti impress product reliabl
+1011,Great experience from ordering to delivery,125,43,42,8055,0.657,0.73,Positive,great experi order deliveri
+1012,"Amazing support team, they solved my issue quickly",178,61,44,4343,0.865,0.69,Positive,amaz support team solv issu quick
+1013,I am extremely pleased with this product,190,33,36,4797,0.714,0.94,Positive,extrem pleas product
+1014,"Good product, good service and a smooth experience",58,38,17,8129,0.384,0.69,Positive,good product good servic smooth experi
+1015,The new product is excellent and worth the price,84,28,18,8416,0.392,0.72,Positive,new product excel worth price
+1016,Very useful product and easy to use every day,97,31,28,5359,0.478,0.84,Positive,use product easi use everi day
+1017,Happy with the purchase and the fast delivery,85,36,17,564,0.429,0.63,Positive,happi purchas fast deliveri
+1018,"Excellent service, I would definitely buy again",53,31,3,2527,0.277,0.73,Positive,excel servic definit buy
+1019,The product is fantastic and performs really well,107,18,19,891,0.393,0.88,Positive,product fantast perform realli well
+1020,"Wonderful experience, the quality exceeded expectations",77,66,7,4061,0.519,0.75,Positive,wonder experi qualiti exceed expect
+1021,Super happy with the results and customer support,85,35,9,8892,0.389,0.84,Positive,super happi result custom support
+1022,Great value and excellent performance,206,40,25,9496,0.732,0.88,Positive,great valu excel perform
+1023,Fast shipping and a very good product,148,29,29,5556,0.577,0.76,Positive,fast ship good product
+1024,"I love this product, it is simple and effective",219,21,5,4340,0.575,0.88,Positive,love product simpl effect
+1025,Very good experience and helpful support,186,46,29,4988,0.739,0.88,Positive,good experi help support
+1026,Very poor quality and the product stopped working,97,13,52,1263,0.495,0.29,Negative,poor qualiti product stop work
+1027,Terrible service and extremely slow delivery,59,32,5,2157,0.303,0.1,Negative,terribl servic extrem slow deliveri
+1028,I am unhappy with the product and the poor support,110,15,44,5036,0.496,0.13,Negative,unhappi product poor support
+1029,"Bad experience, the product arrived damaged",39,7,52,3557,0.346,0.38,Negative,bad experi product arriv damag
+1030,The quality is disappointing and not worth the price,49,6,29,4027,0.259,0.2,Negative,qualiti disappoint not worth price
+1031,Very frustrating experience with this product,69,11,29,5992,0.325,0.17,Negative,frustrat experi product
+1032,Customer support was slow and did not solve my issue,104,1,28,7176,0.342,0.35,Negative,custom support slow not solv issu
+1033,The product is unreliable and keeps failing,112,3,40,5975,0.422,0.25,Negative,product unreli keep fail
+1034,"Late delivery and poor packaging, very disappointed",69,33,52,1063,0.537,0.4,Negative,late deliveri poor packag disappoint
+1035,I regret buying this product because the quality is bad,39,32,25,3704,0.351,0.2,Negative,regret buy product qualiti bad
+1036,"Terrible product, it does not work as promised",69,12,40,7954,0.379,0.16,Negative,terribl product not work promis
+1037,Poor service and no response from the support team,63,17,50,5137,0.436,0.2,Negative,poor servic no respons support team
+1038,The new features are confusing and not useful,94,32,34,6928,0.503,0.14,Negative,new featur confus not use
+1039,Very disappointed with the purchase and delivery,9,26,33,5935,0.295,0.27,Negative,disappoint purchas deliveri
+1040,Bad quality and a frustrating customer experience,62,11,18,4789,0.262,0.19,Negative,bad qualiti frustrat custom experi
+1041,"The product failed after a few days, very unhappy",105,6,23,2330,0.347,0.35,Negative,product fail day unhappi
+1042,Slow shipping and damaged packaging,23,33,10,4682,0.256,0.12,Negative,slow ship damag packag
+1043,Not satisfied with the product or customer service,100,3,21,3211,0.313,0.3,Negative,not satisfi product custom servic
+1044,The price is too high for such poor quality,26,26,4,8738,0.201,0.18,Negative,price high poor qualiti
+1045,"Awful experience, I would not recommend this product",78,33,41,6159,0.507,0.24,Negative,aw experi not recommend product
+1046,The product performance is poor and unreliable,111,1,12,8555,0.285,0.32,Negative,product perform poor unreli
+1047,Support was unhelpful and the issue remains unresolved,57,23,32,4461,0.374,0.31,Negative,support unhelp issu remain unresolv
+1048,Very bad experience and wasted money,14,16,27,2449,0.229,0.42,Negative,bad experi wast money
+1049,Disappointing product with terrible customer service,19,5,38,7558,0.233,0.18,Negative,disappoint product terribl custom servic
+1050,The delivery was late and the product quality was poor,106,19,49,2655,0.53,0.38,Negative,deliveri late product qualiti poor

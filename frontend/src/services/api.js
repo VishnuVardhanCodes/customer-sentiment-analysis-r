@@ -16,6 +16,30 @@ export const api = {
     return res.data;
   },
 
+  // Workflow A: Individual Product Review Analyzer
+  analyzeReview: async (reviewData) => {
+    const res = await client.post('/analyze-review', reviewData);
+    return res.data;
+  },
+
+  // Compare Multiple Reviews for a Product
+  analyzeReviews: async (multiData) => {
+    const res = await client.post('/analyze-reviews', multiData);
+    return res.data;
+  },
+
+  // Machine Learning Model Status & Capabilities
+  getModelInfo: async () => {
+    const res = await client.get('/model-info');
+    return res.data;
+  },
+
+  // Product-Level & Category-Level Dataset Summaries
+  getProductSummary: async () => {
+    const res = await client.get('/product-summary');
+    return res.data;
+  },
+
   uploadDataset: async (fileContent, filename) => {
     const res = await client.post('/upload', {
       filename: filename,
@@ -24,10 +48,13 @@ export const api = {
     return res.data;
   },
 
-  validateDataset: async (textColumn, labelColumn) => {
+  validateDataset: async (textColumn, labelColumn, productColumn, categoryColumn, ratingColumn) => {
     const res = await client.post('/validate', {
       text_column: textColumn,
       label_column: labelColumn,
+      product_column: productColumn,
+      category_column: categoryColumn,
+      rating_column: ratingColumn,
     });
     return res.data;
   },

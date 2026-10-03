@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AnalysisProvider } from './context/AnalysisContext';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
+import ProductReviewAnalyzer from './pages/ProductReviewAnalyzer';
+import CompareReviews from './pages/CompareReviews';
 import UploadData from './pages/UploadData';
 import DataValidation from './pages/DataValidation';
 import Preprocessing from './pages/Preprocessing';
@@ -13,6 +15,8 @@ import ModelEvaluation from './pages/ModelEvaluation';
 import Visualization from './pages/Visualization';
 import CustomerInsights from './pages/CustomerInsights';
 import ResultsDownload from './pages/ResultsDownload';
+import HowItWorks from './pages/HowItWorks';
+import AboutProject from './pages/AboutProject';
 
 function App() {
   return (
@@ -21,6 +25,8 @@ function App() {
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="analyzer" element={<ProductReviewAnalyzer />} />
+            <Route path="compare" element={<CompareReviews />} />
             <Route path="upload" element={<UploadData />} />
             <Route path="validation" element={<DataValidation />} />
             <Route path="preprocessing" element={<Preprocessing />} />
@@ -31,6 +37,8 @@ function App() {
             <Route path="visualization" element={<Visualization />} />
             <Route path="insights" element={<CustomerInsights />} />
             <Route path="results" element={<ResultsDownload />} />
+            <Route path="how-it-works" element={<HowItWorks />} />
+            <Route path="about" element={<AboutProject />} />
           </Route>
         </Routes>
       </BrowserRouter>
@@ -39,3 +47,4 @@ function App() {
 }
 
 export default App;
+

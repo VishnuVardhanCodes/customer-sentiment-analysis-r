@@ -4,16 +4,18 @@ import { api } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import DownloadCard from '../components/DownloadCard';
 import LoadingState from '../components/LoadingState';
-import { Download, FileSpreadsheet, FileText, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 const ResultsDownload = () => {
-  const { pipelineStatus, loading, setLoading, loadingText } = useAnalysis();
+  const { pipelineStatus, loading, productSummaries, singleReviewAnalysis } = useAnalysis();
   const [downloadFlags, setDownloadFlags] = useState({
     processed: false,
     sentiment: false,
     models: false,
     insights: false,
     complete: false,
+    product_summary: false,
+    review_analysis: false,
   });
 
   useEffect(() => {
@@ -24,7 +26,10 @@ const ResultsDownload = () => {
     try {
       const res = await api.getResults();
       if (res.success && res.data.available_downloads) {
-        setDownloadFlags(res.data.available_downloads);
+        setDownloadFlags((prev) => ({
+          ...prev,
+          ...res.data.available_downloads,
+        }));
       }
     } catch (err) {
       console.error(err);
@@ -32,14 +37,14 @@ const ResultsDownload = () => {
   };
 
   if (loading) {
-    return <LoadingState message={loadingText} />;
+    return <LoadingState message="Loading downloadable export files..." />;
   }
 
   return (
     <div>
       <PageHeader
         title="Results & Data Export Center"
-        subtitle="Export clean preprocessed datasets, lexicon sentiment scores, model comparison benchmarks, and text reports."
+        subtitle="Export clean preprocessed datasets, lexicon sentiment scores, product-level summaries, model comparison benchmarks, and text reports."
       />
 
       {/* DOWNLOAD CARDS GRID */}
@@ -56,13 +61,31 @@ const ResultsDownload = () => {
         {/* Card 2: Sentiment Results */}
         <DownloadCard
           title="Sentiment Analysis Results"
-          description="Dataset augmented with Bing lexicon numerical sentiment scores and Positive/Neutral/Negative labels."
+          description="Dataset augmented with numerical sentiment scores, Bing polarity, and Positive/Neutral/Negative labels."
           format="CSV"
           endpoint="sentiment"
           available={downloadFlags.sentiment || pipelineStatus.sentiment_analyzed}
         />
 
-        {/* Card 3: Model Performance */}
+        {/* Card 3: Product-Level Summaries */}
+        <DownloadCard
+          title="Product-Level Sentiment Summaries"
+          description="Aggregated review counts, positive/neutral/negative percentages, average ratings, and keywords per product."
+          format="CSV"
+          endpoint="product-summary"
+          available={downloadFlags.product_summary || (productSummaries && productSummaries.length > 0)}
+        />
+
+        {/* Card 4: Single Review Analysis */}
+        <DownloadCard
+          title="Single Review Analysis Result"
+          description="Detailed JSON analysis of the most recently evaluated product review, including buyer insights and aspects."
+          format="JSON"
+          endpoint="review-analysis"
+          available={downloadFlags.review_analysis || !!singleReviewAnalysis}
+        />
+
+        {/* Card 5: Model Performance */}
         <DownloadCard
           title="Machine Learning Metrics"
           description="Comparative accuracy, precision, recall, and F1-score evaluation metrics across NB, SVM, and KNN."
@@ -71,7 +94,7 @@ const ResultsDownload = () => {
           available={downloadFlags.models || pipelineStatus.evaluated}
         />
 
-        {/* Card 4: Customer Insights */}
+        {/* Card 6: Customer Insights */}
         <DownloadCard
           title="Customer Insights Report"
           description="Executive summary document detailing positive themes, complaint drivers, and strategic recommendations."
@@ -80,10 +103,10 @@ const ResultsDownload = () => {
           available={downloadFlags.insights || pipelineStatus.insights_generated}
         />
 
-        {/* Card 5: Complete Analysis Package */}
+        {/* Card 7: Complete Analysis Package */}
         <DownloadCard
           title="Complete Combined Analysis"
-          description="Full dataset export combining original reviews, preprocessed text, sentiment scores, and model classifications."
+          description="Full dataset export combining original reviews, product attributes, preprocessed text, and predicted sentiments."
           format="CSV"
           endpoint="complete"
           available={downloadFlags.complete || pipelineStatus.sentiment_analyzed}
@@ -97,13 +120,13 @@ const ResultsDownload = () => {
         </h3>
         <div style={{ fontSize: '0.88rem', color: '#475569', lineHeight: '1.6' }}>
           <p style={{ marginBottom: '0.5rem' }}>
-            <strong>Project Title:</strong> LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
+            <strong>Project Title:</strong> Customer Sentiment Analysis from Social Media and Product Reviews Using Text Mining in R
           </p>
           <p style={{ marginBottom: '0.5rem' }}>
-            <strong>Backend Architecture:</strong> RESTful API powered by R Plumber server delivering statistical analytics.
+            <strong>Backend Architecture:</strong> RESTful API powered by R Plumber server delivering statistical analytics and machine learning inference.
           </p>
           <p style={{ marginBottom: '0.5rem' }}>
-            <strong>Algorithms Implemented:</strong> Syuzhet Bing Lexicon Scoring, Document-Term Matrix (DTM), TF-IDF Feature Extraction, Naive Bayes, Support Vector Machine (SVM), and K-Nearest Neighbors (KNN).
+            <strong>Algorithms Implemented:</strong> Syuzhet Lexicon Scoring (Bing/AFINN), Document-Term Matrix (DTM), TF-IDF Feature Extraction, Naive Bayes (e1071), Support Vector Machine (SVM linear kernel), and K-Nearest Neighbors (KNN).
           </p>
         </div>
       </div>
@@ -112,3 +135,4 @@ const ResultsDownload = () => {
 };
 
 export default ResultsDownload;
+

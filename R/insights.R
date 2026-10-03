@@ -1,6 +1,6 @@
 # ==============================================================================
 # LG9 – Customer Sentiment Analysis from Social Media using Text Mining in R
-# Module: Customer Insights & Opinion Analysis (R/insights.R)
+# Module: Customer Insights & Opinion Analysis (backend/R/insights.R)
 # ==============================================================================
 
 suppressPackageStartupMessages({

@@ -1,0 +1,24 @@
+{
+  "product_name": "Samsung Galaxy S24",
+  "product_category": "Smartphones",
+  "original_rating": 5,
+  "original_review": "The screen is vibrant and battery easily lasts 2 days on a single charge.",
+  "cleaned_review": "screen vibrant batteri easili last day singl charg",
+  "predicted_sentiment": "Negative",
+  "sentiment_score": 1,
+  "confidence_score": 79,
+  "analysis_method": "Supervised Support Vector Machine (Linear Kernel SVM)",
+  "analysis_method_type": "Supervised Machine Learning",
+  "positive_keywords": "vibrant",
+  "negative_keywords": [],
+  "mentioned_aspects": ["battery life & charging", "performance & display"],
+  "important_keywords": ["vibrant", "screen", "battery", "easily", "lasts", "days"],
+  "explanation": "The review highlights critical customer concerns or product deficiencies regarding battery life & charging and performance & display.",
+  "potential_buyer_insight": "The reviewer reports specific issues or dissatisfaction regarding battery life & charging and performance & display. Potential buyers may want to weigh these reported concerns against alternatives before purchasing.",
+  "preprocessing_stats": {
+    "words_before": 14,
+    "words_after": 8,
+    "stopwords_removed": 6,
+    "tokens": ["screen", "vibrant", "batteri", "easili", "last", "day", "singl", "charg"]
+  }
+}
